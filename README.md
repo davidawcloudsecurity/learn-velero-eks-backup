@@ -1,3 +1,4 @@
+!#/bin/bash
 # learn-velero-eks-backup
 how to backup aws eks cluster with velero
 1. Using s3 to export backup configmaps, secrets and pvc
