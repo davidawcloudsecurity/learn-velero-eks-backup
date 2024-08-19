@@ -4,7 +4,7 @@ provider "aws" {
 
 # Data sources to get existing resources
 data "aws_iam_role" "eks_role" {
-  name = "your-existing-iam-role-name"
+  name = "eks-cluster-f92sh"
 }
 
 data "aws_vpc" "vpc" {
