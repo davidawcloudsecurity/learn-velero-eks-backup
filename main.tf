@@ -76,6 +76,7 @@ resource "aws_eks_fargate_profile" "platform_service_profile" {
   depends_on = [aws_eks_cluster.eks_cluster]
 }
 
+/*
 # ConfigMap for platform-service
 resource "kubernetes_config_map" "platform_service_config" {
   metadata {
@@ -89,6 +90,7 @@ resource "kubernetes_config_map" "platform_service_config" {
 
   depends_on = [aws_eks_fargate_profile.platform_service_profile]
 }
+*/
 
 provider "kubernetes" {
   host                   = aws_eks_cluster.eks_cluster.endpoint
