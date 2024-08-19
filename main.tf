@@ -48,7 +48,7 @@ resource "aws_eks_fargate_profile" "kube_system_profile" {
   fargate_profile_name   = "kube-system"
   pod_execution_role_arn = data.aws_iam_role.eks_role.arn
 
-  selectors {
+  selector {
     namespace = "kube-system"
   }
 
@@ -63,7 +63,7 @@ resource "aws_eks_fargate_profile" "platform_service_profile" {
   fargate_profile_name   = "platform-service"
   pod_execution_role_arn = data.aws_iam_role.eks_role.arn
 
-  selectors {
+  selector {
     namespace = "platform-service"
   }
 
