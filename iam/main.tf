@@ -1,5 +1,10 @@
 provider "aws" {
-  region = var.region
+  region = var.region_code
+}
+
+variable "region_code" {
+  description = "The name of the region"
+  type        = string
 }
 
 variable "bucket_name" {
