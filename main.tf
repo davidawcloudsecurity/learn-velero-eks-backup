@@ -7,6 +7,10 @@ data "aws_iam_role" "eks_role" {
   name = "eks-cluster-f92sh"
 }
 
+data "aws_iam_role" "fargate_role" {
+  name = "eks-fargate-system-profile-pd-g2xmdp7"
+}
+
 data "aws_vpc" "vpc" {
   id = "vpc-0c264b217b411a08a"
 }
@@ -46,7 +50,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 resource "aws_eks_fargate_profile" "kube_system_profile" {
   cluster_name           = aws_eks_cluster.eks_cluster.name
   fargate_profile_name   = "kube-system"
-  pod_execution_role_arn = data.aws_iam_role.eks_role.arn
+  pod_execution_role_arn = data.aws_iam_role.fargate_role.arn
 
   selector {
     namespace = "kube-system"
@@ -61,7 +65,7 @@ resource "aws_eks_fargate_profile" "kube_system_profile" {
 resource "aws_eks_fargate_profile" "platform_service_profile" {
   cluster_name           = aws_eks_cluster.eks_cluster.name
   fargate_profile_name   = "platform-service"
-  pod_execution_role_arn = data.aws_iam_role.eks_role.arn
+  pod_execution_role_arn = data.aws_iam_role.fargate_role.arn
 
   selector {
     namespace = "platform-service"
