@@ -6,6 +6,6 @@ alias k=kubectl; alias tf="terraform"; alias tfa="terraform apply --auto-approve
 bucket_name=$(aws eks list-clusters --query clusters[0] --output text); \
 primary_cluster=$(aws eks list-clusters --query clusters[0] --output text); \
 recovery_cluster=$(aws eks list-clusters --query clusters[1] --output text); \
-tfm -var $bucket_name-eks-velero-backups -var $primary_cluster -var $recovery_cluster
-tfa -var $bucket_name-eks-velero-backups -var $primary_cluster -var $recovery_cluster
+tfm -var bucket_name=$bucket_name-eks-velero-backups -var primary_cluster=$primary_cluster -var recovery_cluster=$recovery_cluster
+tfa -var bucket_name=$bucket_name-eks-velero-backups -var primary_cluster=$primary_cluster -var recovery_cluster=$recovery_cluster
 ```
