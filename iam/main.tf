@@ -121,26 +121,6 @@ resource "aws_iam_role" "velero_recovery_role" {
   ]
 }
 
-# EKS IAM Service Account for Velero in Primary Cluster
-resource "aws_eks_identity_provider_config" "primary_iam_service_account" {
-  cluster_name = var.primary_cluster
-  service_name = "eks.amazonaws.com"
-
-  iam_roles = [
-    aws_iam_role.velero_primary_role.arn
-  ]
-}
-
-# EKS IAM Service Account for Velero in Recovery Cluster
-resource "aws_eks_identity_provider_config" "recovery_iam_service_account" {
-  cluster_name = var.recovery_cluster
-  service_name = "eks.amazonaws.com"
-
-  iam_roles = [
-    aws_iam_role.velero_recovery_role.arn
-  ]
-}
-
 # Outputs
 output "s3_bucket_name" {
   value = aws_s3_bucket.velero.bucket
