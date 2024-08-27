@@ -113,7 +113,7 @@ resource "aws_eks_fargate_profile" "platform_service_profile" {
 }
 
 # Fargate Profile for velero
-resource "aws_eks_fargate_profile" "platform_service_profile" {
+resource "aws_eks_fargate_profile" "velero" {
   cluster_name           = aws_eks_cluster.eks_cluster.name
   fargate_profile_name   = "velero"
   pod_execution_role_arn = data.aws_iam_role.fargate_role.arn
