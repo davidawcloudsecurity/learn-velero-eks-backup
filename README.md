@@ -85,18 +85,21 @@ get_cluster_details() {
 
   # Describe the EKS cluster to get VPC and subnet information
   cluster_info=$(aws eks describe-cluster --name "$cluster_name" --query "cluster.resourcesVpcConfig" --output json)
-
+  export cluster_role=$(aws iam list-roles --query "Roles[*].RoleName" --output text | grep "eks-cluster" | sed 's/[",]//g')
+  export fargate_role=$(aws iam list-roles --query "Roles[*].RoleName" --output text | grep "eks-cluster" | sed 's/[",]//g')
   # Extract VPC ID, Subnet IDs, and Security Group IDs
-  vpc_id=$(echo "$cluster_info" | jq -r '.vpcId')
-  subnet_ids=$(echo "$cluster_info" | jq -r '.subnetIds[]')
-  security_group_ids=$(echo "$cluster_info" | jq -r '.securityGroupIds[]')
+  export vpcid=$(echo "$cluster_info" | jq -r '.vpcId')
+  export subnet_1=$(echo "$cluster_info" | jq -r '.subnetIds[0]')
+  export subnet_2=$(echo "$cluster_info" | jq -r '.subnetIds[1]')
+  eks_sg=$(echo "$cluster_info" | jq -r '.securityGroupIds[0]')
+  security_group_ids=$(echo "$cluster_info" | jq -r '.securityGroupIds[1]')
 
   echo "Details for EKS cluster: $cluster_name"
-  echo "VPC ID: $vpc_id"
+  echo "VPC ID: $vpcid"
   echo "Subnet IDs:"
-  echo "$subnet_ids"
+  echo "$subnet_1 $subnet_2"
   echo "Security Group IDs:"
-  echo "$security_group_ids"
+  echo "$eks_sg $security_group_ids"
   echo
 
   # Return the details
@@ -147,10 +150,14 @@ else
 
 # Example usage
 original_cluster_name=$clusters
-new_cluster_name="${original_cluster_name}02"  # Create a new cluster name by appending '02'
+export new_cluster_name="${original_cluster_name}02"  # Create a new cluster name by appending '02'
 
 # Call the function to create a new EKS cluster using the existing cluster's details
-create_new_cluster "$original_cluster_name" "$new_cluster_name"
+# create_new_cluster "$original_cluster_name" "$new_cluster_name"
+```
+## Run this after the above script
+```bash
+tfm -var eks_cluster=$new_cluster_name -var eks_role=$cluster_role -var fargate_role=$fargate_role -var vpcid=$vpcid -var subnet_1=$subnet_1 -var subnet_2=$subnet_2 -var eks_sg=$eks_sg
 ```
 Resource - https://bluexp.netapp.com/blog/cbs-aws-blg-eks-back-up-how-to-back-up-and-restore-eks-with-velero
 
