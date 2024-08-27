@@ -12,7 +12,7 @@ variable "eks_role" {
 
 # Data sources to get existing resources
 data "aws_iam_role" "eks_role" {
-  name = ${var.eks_role}
+  name = var.eks_role
 #  name = "eks-cluster-f92sh"
 }
 
@@ -21,7 +21,7 @@ variable "fargate_role" {
 }
 
 data "aws_iam_role" "fargate_role" {
-  name = ${var.fargate_role}
+  name = var.fargate_role
 #  name = "eks-fargate-system-profile-pd-g2xmdp7"
 }
 
