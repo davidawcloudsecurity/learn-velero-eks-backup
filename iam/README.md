@@ -33,3 +33,11 @@ eksctl create iamserviceaccount \
     --attach-policy-arn=arn:aws:iam::$ACCOUNT:policy/VeleroAccessPolicy \
     --approve
 ```
+```bash
+PRIMARY_CLUSTER=$(aws eks list-clusters --query clusters[0] --output text); \
+RECOVERY_CLUSTER=$(aws eks list-clusters --query clusters[1] --output text); \
+PRIMARY_CONTEXT=primary
+RECOVERY_CONTEXT=recovery
+aws eks --region $REGION update-kubeconfig --name $PRIMARY_CLUSTER --alias $PRIMARY_CONTEXT
+aws eks --region $REGION update-kubeconfig --name $RECOVERY_CLUSTER --alias $RECOVERY_CONTEXT
+```
