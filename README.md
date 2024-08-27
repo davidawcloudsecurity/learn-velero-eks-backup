@@ -109,15 +109,15 @@ pod:
 ## How to replicate a new cluster from existing one
 ```bash
 #!/bin/bash
-
+REGION="ap-southeast-1"
 # Function to retrieve details of an existing EKS cluster
 get_cluster_details() {
   clusters=$1
-
+  
   # Describe the EKS cluster to get VPC and subnet information
-  cluster_info=$(aws eks describe-cluster --name "$clusters" --query "cluster.resourcesVpcConfig" --output json)
-  export cluster_role=$(aws iam list-roles --query "Roles[*].RoleName" | grep "eks-cluster" | sed 's/[",]//g; s/ //g')
-  export fargate_role=$(aws iam list-roles --query "Roles[*].RoleName" | grep "eks-cluster" | sed 's/[",]//g; s/ //g')
+  cluster_info=$(aws eks describe-cluster --name "$clusters" --query "cluster.resourcesVpcConfig" --region $REGION --output json)
+  export cluster_role=$(aws iam list-roles --query "Roles[*].RoleName" --region $REGION | grep "eks-cluster" | sed 's/[",]//g; s/ //g')
+  export fargate_role=$(aws iam list-roles --query "Roles[*].RoleName" --region $REGION | grep "eks-cluster" | sed 's/[",]//g; s/ //g')
   # Extract VPC ID, Subnet IDs, and Security Group IDs
   export vpcid=$(echo "$cluster_info" | jq -r '.vpcId')
   export subnet_1=$(echo "$cluster_info" | jq -r '.subnetIds[0]')
@@ -168,7 +168,7 @@ create_new_cluster() {
 }
 
 # Retrieve the list of all EKS clusters in the current AWS account
-export clusters=$(aws eks list-clusters --query "clusters[0]" --output text)
+export clusters=$(aws eks list-clusters --query "clusters[0]" --region $REGION --output text)
 
 # Check if any clusters are returned
 if [ -z "$clusters" ]; then
