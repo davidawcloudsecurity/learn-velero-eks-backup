@@ -157,6 +157,7 @@ export new_cluster_name="${original_cluster_name}02"  # Create a new cluster nam
 ```
 ## Run this after the above script
 ```bash
+alias k=kubectl; alias tf="terraform"; alias tfa="terraform apply --auto-approve"; alias tfd="terraform destroy --auto-approve"; alias tfm="terraform init; terraform fmt; terraform validate; terraform plan"; sudo yum install -y yum-utils shadow-utils; sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo; sudo yum -y install terraform
 tfm -var eks_cluster=$new_cluster_name -var eks_role=$cluster_role -var fargate_role=$fargate_role -var vpcid=$vpcid -var subnet_1=$subnet_1 -var subnet_2=$subnet_2 -var eks_sg=$eks_sg
 ```
 Resource - https://bluexp.netapp.com/blog/cbs-aws-blg-eks-back-up-how-to-back-up-and-restore-eks-with-velero
