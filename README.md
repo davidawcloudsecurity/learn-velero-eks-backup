@@ -116,8 +116,8 @@ get_cluster_details() {
 
   # Describe the EKS cluster to get VPC and subnet information
   cluster_info=$(aws eks describe-cluster --name "$clusters" --query "cluster.resourcesVpcConfig" --output json)
-  export cluster_role=$(aws iam list-roles --query "Roles[*].RoleName" | grep "eks-cluster" | sed 's/[",]//g')
-  export fargate_role=$(aws iam list-roles --query "Roles[*].RoleName" | grep "eks-cluster" | sed 's/[",]//g')
+  export cluster_role=$(aws iam list-roles --query "Roles[*].RoleName" | grep "eks-cluster" | sed 's/[",]//g; s/ //g')
+  export fargate_role=$(aws iam list-roles --query "Roles[*].RoleName" | grep "eks-cluster" | sed 's/[",]//g; s/ //g')
   # Extract VPC ID, Subnet IDs, and Security Group IDs
   export vpcid=$(echo "$cluster_info" | jq -r '.vpcId')
   export subnet_1=$(echo "$cluster_info" | jq -r '.subnetIds[0]')
