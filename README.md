@@ -76,6 +76,7 @@ eksctl create iamserviceaccount \
     --approve
 ```
 ## How to replicate a new cluster from existing one
+```bash
 #!/bin/bash
 
 # Function to retrieve details of an existing EKS cluster
