@@ -2,34 +2,66 @@ provider "aws" {
   region = "ap-southeast-1"
 }
 
+variable "eks_role" {
+  type = string
+}
+
 # Data sources to get existing resources
 data "aws_iam_role" "eks_role" {
-  name = "eks-cluster-f92sh"
+  name = var.eks_role
+#  name = "eks-cluster-f92sh"
+}
+
+variable "fargate_role" {
+  type = string
 }
 
 data "aws_iam_role" "fargate_role" {
-  name = "eks-fargate-system-profile-pd-g2xmdp7"
+  name = var.fargate_role
+#  name = "eks-fargate-system-profile-pd-g2xmdp7"
+}
+
+variable "vpcid" {
+  type = string
 }
 
 data "aws_vpc" "vpc" {
-  id = "vpc-0c264b217b411a08a"
+  id = var.vpcid
+#  id = "vpc-0c264b217b411a08a"
 }
 
+variable "subnet_1" {
+
+}
 data "aws_subnet" "subnet_1" {
-  id = "subnet-02098f8ac2178bbea"
+  id = var.subnet_1
+#  id = "subnet-02098f8ac2178bbea"
+}
+
+variable "subnet_2" {
+  
 }
 
 data "aws_subnet" "subnet_2" {
-  id = "subnet-0749ab2836b8fac6e"
+  id = var.subnet_2
+#  id = "subnet-0749ab2836b8fac6e"
+}
+
+variable "eks_sg" {
+  
 }
 
 data "aws_security_group" "eks_sg" {
-  id = "sg-08567c7350c264402"
+  id = var.eks_sg
+#  id = "sg-08567c7350c264402"
 }
 
+variable eks_cluster {
+}
 # EKS Cluster
 resource "aws_eks_cluster" "eks_cluster" {
-  name     = "f92sh02"
+  name     = var.eks_cluster
+#  name     = "f92sh02"
   role_arn = data.aws_iam_role.eks_role.arn
 
   vpc_config {
@@ -69,6 +101,21 @@ resource "aws_eks_fargate_profile" "platform_service_profile" {
 
   selector {
     namespace = "platform-service"
+  }
+
+  subnet_ids = [data.aws_subnet.subnet_1.id, data.aws_subnet.subnet_2.id]
+
+  depends_on = [aws_eks_cluster.eks_cluster]
+}
+
+# Fargate Profile for velero
+resource "aws_eks_fargate_profile" "platform_service_profile" {
+  cluster_name           = aws_eks_cluster.eks_cluster.name
+  fargate_profile_name   = "velero"
+  pod_execution_role_arn = data.aws_iam_role.fargate_role.arn
+
+  selector {
+    namespace = "velero"
   }
 
   subnet_ids = [data.aws_subnet.subnet_1.id, data.aws_subnet.subnet_2.id]
