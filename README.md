@@ -136,7 +136,6 @@ create_new_cluster() {
   echo "New EKS cluster creation initiated: $new_cluster_name"
 }
 
-
 # Retrieve the list of all EKS clusters in the current AWS account
 clusters=$(aws eks list-clusters --query "clusters[0]" --output text)
 
@@ -150,6 +149,7 @@ else
 
 # Example usage
 original_cluster_name=$clusters
+get_cluster_details "$clusters"
 export new_cluster_name="${original_cluster_name}02"  # Create a new cluster name by appending '02'
 
 # Call the function to create a new EKS cluster using the existing cluster's details
