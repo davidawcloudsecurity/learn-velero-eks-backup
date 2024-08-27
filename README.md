@@ -53,8 +53,8 @@ aws iam create-policy \
     --policy-name VeleroAccessPolicy \
     --policy-document file://velero_policy.json
 
-PRIMARY_CLUSTER=$(aws eks list-clusters --query clusters --output text)
-RECOVERY_CLUSTER=<CLUSTERNAME>
+PRIMARY_CLUSTER=$(aws eks list-clusters --query clusters[0] --output text)
+RECOVERY_CLUSTER=$(aws eks list-clusters --query clusters[1] --output text)
 ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 
 eksctl create iamserviceaccount \
