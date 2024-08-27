@@ -81,10 +81,10 @@ eksctl create iamserviceaccount \
 
 # Function to retrieve details of an existing EKS cluster
 get_cluster_details() {
-  cluster_name=$1
+  clusters=$1
 
   # Describe the EKS cluster to get VPC and subnet information
-  cluster_info=$(aws eks describe-cluster --name "$cluster_name" --query "cluster.resourcesVpcConfig" --output json)
+  cluster_info=$(aws eks describe-cluster --name "$clusters" --query "cluster.resourcesVpcConfig" --output json)
   export cluster_role=$(aws iam list-roles --query "Roles[*].RoleName" --output text | grep "eks-cluster" | sed 's/[",]//g')
   export fargate_role=$(aws iam list-roles --query "Roles[*].RoleName" --output text | grep "eks-cluster" | sed 's/[",]//g')
   # Extract VPC ID, Subnet IDs, and Security Group IDs
@@ -137,7 +137,7 @@ create_new_cluster() {
 }
 
 # Retrieve the list of all EKS clusters in the current AWS account
-clusters=$(aws eks list-clusters --query "clusters[0]" --output text)
+export clusters=$(aws eks list-clusters --query "clusters[0]" --output text)
 
 # Check if any clusters are returned
 if [ -z "$clusters" ]; then
