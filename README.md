@@ -79,7 +79,7 @@ values.yaml
 ```bash
 configuration:
   backupStorageLocation:
-  - bucket: rzao9-eks-velero-backups
+  - bucket: eks-velero-backups
     provider: aws
   volumeSnapshotLocation:
   - config:
@@ -96,7 +96,7 @@ credentials:
 serviceAccount:
   server:
     annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::654654412434:role/eks-velero-backup"
+      eks.amazonaws.com/role-arn: "arn:aws:iam::12345678910:role/eks-velero-backup"
 # Add tolerations under the pod specification (server) section
 pod:
   server:
