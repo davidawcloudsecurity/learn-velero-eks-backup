@@ -75,6 +75,37 @@ eksctl create iamserviceaccount \
     --attach-policy-arn=arn:aws:iam::$ACCOUNT:policy/VeleroAccessPolicy \
     --approve
 ```
+values.yaml
+```bash
+configuration:
+  backupStorageLocation:
+  - bucket: rzao9-eks-velero-backups
+    provider: aws
+  volumeSnapshotLocation:
+  - config:
+      region: ap-southeast-1
+    provider: aws
+initContainers:
+- name: velero-plugin-for-aws
+  image: velero/velero-plugin-for-aws:v1.7.1
+  volumeMounts:
+  - mountPath: /target
+    name: plugins
+credentials:
+  useSecret: false
+serviceAccount:
+  server:
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::654654412434:role/eks-velero-backup"
+# Add tolerations under the pod specification (server) section
+pod:
+  server:
+    tolerations:
+    - key: "eks.amazonaws.com/compute-type"
+      operator: "Equal"
+      value: "fargate"
+      effect: "NoSchedule"
+```
 ## How to replicate a new cluster from existing one
 ```bash
 #!/bin/bash
