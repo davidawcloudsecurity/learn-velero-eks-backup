@@ -100,7 +100,7 @@ credentials:
 serviceAccount:
   server:
     annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::12345678910:role/eks-velero-backup"
+      eks.amazonaws.com/role-arn: "arn:aws:iam::${ACCOUNT}:role/eks-velero-backup"
 # Add tolerations under the pod specification (server) section
 pod:
   server:
