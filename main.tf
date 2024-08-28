@@ -2,7 +2,7 @@ provider "aws" {
   region = var.region
 }
 
-variable region {
+variable "region" {
   default = "ap-southeast-1"
 }
 
@@ -13,7 +13,7 @@ variable "eks_role" {
 # Data sources to get existing resources
 data "aws_iam_role" "eks_role" {
   name = var.eks_role
-#  name = "eks-cluster-f92sh"
+  #  name = "eks-cluster-f92sh"
 }
 
 variable "fargate_role" {
@@ -22,7 +22,7 @@ variable "fargate_role" {
 
 data "aws_iam_role" "fargate_role" {
   name = var.fargate_role
-#  name = "eks-fargate-system-profile-pd-g2xmdp7"
+  #  name = "eks-fargate-system-profile-pd-g2xmdp7"
 }
 
 variable "vpcid" {
@@ -31,7 +31,7 @@ variable "vpcid" {
 
 data "aws_vpc" "vpc" {
   id = var.vpcid
-#  id = "vpc-0c264b217b411a08a"
+  #  id = "vpc-0c264b217b411a08a"
 }
 
 variable "subnet_1" {
@@ -39,33 +39,33 @@ variable "subnet_1" {
 }
 data "aws_subnet" "subnet_1" {
   id = var.subnet_1
-#  id = "subnet-02098f8ac2178bbea"
+  #  id = "subnet-02098f8ac2178bbea"
 }
 
 variable "subnet_2" {
-  
+
 }
 
 data "aws_subnet" "subnet_2" {
   id = var.subnet_2
-#  id = "subnet-0749ab2836b8fac6e"
+  #  id = "subnet-0749ab2836b8fac6e"
 }
 
 variable "eks_sg" {
-  
+
 }
 
 data "aws_security_group" "eks_sg" {
   id = var.eks_sg
-#  id = "sg-08567c7350c264402"
+  #  id = "sg-08567c7350c264402"
 }
 
-variable eks_cluster {
+variable "eks_cluster" {
 }
 # EKS Cluster
 resource "aws_eks_cluster" "eks_cluster" {
-  name     = var.eks_cluster
-#  name     = "f92sh02"
+  name = var.eks_cluster
+  #  name     = "f92sh02"
   role_arn = data.aws_iam_role.eks_role.arn
 
   vpc_config {
