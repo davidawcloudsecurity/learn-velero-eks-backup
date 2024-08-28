@@ -4,6 +4,7 @@
 1. Install eksctl - https://eksctl.io/installation/
 2. Download helm - https://github.com/helm/helm/releases
 3. Create an IAM OIDC provider for your cluster - https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
+4. Install velero cli - https://velero.io/docs/v1.6/basic-install/#install-the-cli
 how to backup aws eks cluster with velero
 1. Using s3 to export backup configmaps, secrets and pvc
 ```bash
