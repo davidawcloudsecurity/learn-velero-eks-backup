@@ -1,5 +1,8 @@
 !#/bin/bash
 # learn-velero-eks-backup
+## Prerequisite
+1. Install eksctl - https://eksctl.io/installation/
+2. Download helm - https://github.com/helm/helm/releases
 how to backup aws eks cluster with velero
 1. Using s3 to export backup configmaps, secrets and pvc
 ```bash
