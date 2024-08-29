@@ -75,7 +75,7 @@ resource "aws_iam_policy" "velero_policy" {
     ]
   })
 }
-
+/* Remove as eksctl will create it
 # IAM Role for Velero in Primary Cluster
 resource "aws_iam_role" "velero_primary_role" {
   name = "eks-velero-backup"
@@ -119,7 +119,7 @@ resource "aws_iam_role" "velero_recovery_role" {
     aws_iam_policy.velero_policy.arn
   ]
 }
-
+*/
 # Outputs
 output "s3_bucket_name" {
   value = aws_s3_bucket.velero.bucket
@@ -128,7 +128,7 @@ output "s3_bucket_name" {
 output "velero_policy_arn" {
   value = aws_iam_policy.velero_policy.arn
 }
-
+/*
 output "primary_iam_role_arn" {
   value = aws_iam_role.velero_primary_role.arn
 }
@@ -136,3 +136,4 @@ output "primary_iam_role_arn" {
 output "recovery_iam_role_arn" {
   value = aws_iam_role.velero_recovery_role.arn
 }
+*/
