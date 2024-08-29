@@ -81,6 +81,10 @@ eksctl create iamserviceaccount \
     --approve
 ```
 values.yaml
+
+export BUCKET=
+
+export ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 ```bash
 configuration:
   backupStorageLocation:
