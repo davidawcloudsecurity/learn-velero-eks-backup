@@ -88,7 +88,7 @@ export ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 ```bash
 configuration:
   backupStorageLocation:
-  - bucket: eks-velero-backups
+  - bucket: $BUCKET
     provider: aws
   volumeSnapshotLocation:
   - config:
@@ -119,7 +119,7 @@ values_recovery.yaml
 ```bash
 configuration:
   backupStorageLocation:
-  - bucket: eks-velero-backups
+  - bucket: $BUCKET
     provider: aws
   volumeSnapshotLocation:
   - config:
