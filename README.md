@@ -83,7 +83,7 @@ eksctl create iamserviceaccount \
 values.yaml
 
 export BUCKET=
-
+export REGION_CODE=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
 export ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 ```bash
 configuration:
@@ -92,7 +92,7 @@ configuration:
     provider: aws
   volumeSnapshotLocation:
   - config:
-      region: ap-southeast-1
+      region: $REGION_CODE
     provider: aws
 initContainers:
 - name: velero-plugin-for-aws
