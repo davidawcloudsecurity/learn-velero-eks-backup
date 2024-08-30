@@ -10,6 +10,10 @@ variable "eks_role" {
   type = string
 }
 
+variable "cluster_version" {
+  default = 1.24
+}
+
 # Data sources to get existing resources
 data "aws_iam_role" "eks_role" {
   name = var.eks_role
@@ -65,6 +69,7 @@ variable "eks_cluster" {
 # EKS Cluster
 resource "aws_eks_cluster" "eks_cluster" {
   name = var.eks_cluster
+  version = var.cluster_version
   #  name     = "f92sh02"
   role_arn = data.aws_iam_role.eks_role.arn
 
