@@ -8,7 +8,7 @@
 ```bash
 curl -sLO "https://github.com/vmware-tanzu/velero/releases/download/v1.14.1/velero-v1.14.1-linux-amd64.tar.gz"
 tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
-sudo mv velero-v1.14.1-linux-amd64/velero /usr/local/bin
+sudo mv /tmp/velero-v1.14.1-linux-amd64/velero /usr/local/bin
 ```
 how to backup aws eks cluster with velero
 1. Using s3 to export backup configmaps, secrets and pvc
