@@ -268,4 +268,4 @@ Resource - https://bluexp.netapp.com/blog/cbs-aws-blg-eks-back-up-how-to-back-up
 
 https://aws.amazon.com/blogs/containers/backup-and-restore-your-amazon-eks-cluster-resources-using-velero/
 
-https://stackoverflow.com/questions/66405794/not-authorized-to-perform-stsassumerolewithwebidentity-403
+https://docs.vmware.com/en/VMware-Tanzu-Mission-Control/services/tanzumc-using/GUID-A0618B8D-8A28-4A5F-AC8C-5FF840277ADF.html
