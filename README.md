@@ -269,3 +269,5 @@ Resource - https://bluexp.netapp.com/blog/cbs-aws-blg-eks-back-up-how-to-back-up
 https://aws.amazon.com/blogs/containers/backup-and-restore-your-amazon-eks-cluster-resources-using-velero/
 
 https://docs.vmware.com/en/VMware-Tanzu-Mission-Control/services/tanzumc-using/GUID-A0618B8D-8A28-4A5F-AC8C-5FF840277ADF.html
+
+https://github.com/vmware-tanzu/velero-plugin-for-aws#install-and-start-velero
