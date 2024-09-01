@@ -264,6 +264,11 @@ subnet_2=$(echo "$cluster_info" | jq -r '.subnetIds[1]'); \
 eks_sg=$(echo "$cluster_info" | jq -r '.securityGroupIds[0]') 
 tfm -var "eks_cluster=$new_cluster_name" -var "eks_role=$cluster_role" -var "fargate_role=$fargate_role" -var "vpcid=$vpcid" -var "subnet_1=$subnet_1" -var "subnet_2=$subnet_2" -var "eks_sg=$eks_sg" 
 ```
+
+## Troubleshooting
+```bash
+kubectl get events --sort-by='.lastTimestamp'
+```
 Resource - https://bluexp.netapp.com/blog/cbs-aws-blg-eks-back-up-how-to-back-up-and-restore-eks-with-velero
 
 https://aws.amazon.com/blogs/containers/backup-and-restore-your-amazon-eks-cluster-resources-using-velero/
