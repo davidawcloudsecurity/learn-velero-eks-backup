@@ -3,8 +3,15 @@
 ## Prerequisite
 1. Install eksctl - https://eksctl.io/installation/
 2. Download helm - https://github.com/helm/helm/releases
-3. Create an IAM OIDC provider for your cluster - https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
-4. Install velero cli - https://velero.io/docs/v1.6/basic-install/#install-the-cli
+```bash
+curl -sLO "https://get.helm.sh/helm-v3.15.4-linux-amd64.tar.gz"
+tar -xzvf helm-v3.15.4-linux-amd64.tar.gz -C /tmp && rm helm-v3.15.4-linux-amd64.tar.gz
+sudo mv /tmp/linux-amd64/helm /usr/local/bin
+```
+https://get.helm.sh/helm-v3.15.4-linux-amd64.tar.gz
+   
+4. Create an IAM OIDC provider for your cluster - https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
+5. Install velero cli - https://velero.io/docs/v1.6/basic-install/#install-the-cli
 ```bash
 curl -sLO "https://github.com/vmware-tanzu/velero/releases/download/v1.14.1/velero-v1.14.1-linux-amd64.tar.gz"
 tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
