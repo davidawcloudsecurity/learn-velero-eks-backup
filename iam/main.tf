@@ -11,7 +11,7 @@ variable "bucket_name" {
   description = "The name of the S3 bucket to be created"
   type        = string
 }
-
+/* Remove as eksctl will create it
 variable "primary_cluster" {
   description = "The name of the primary EKS cluster"
   type        = string
@@ -21,7 +21,7 @@ variable "recovery_cluster" {
   description = "The name of the recovery EKS cluster"
   type        = string
 }
-
+*/
 # S3 Bucket
 resource "aws_s3_bucket" "velero" {
   bucket = var.bucket_name
