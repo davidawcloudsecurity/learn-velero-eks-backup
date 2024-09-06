@@ -261,7 +261,15 @@ fargate_role=$(aws iam list-roles --query "Roles[*].RoleName" --region $REGION |
 vpcid=$(echo "$cluster_info" | jq -r '.vpcId'); \
 subnet_1=$(echo "$cluster_info" | jq -r '.subnetIds[0]'); \
 subnet_2=$(echo "$cluster_info" | jq -r '.subnetIds[1]'); \
-eks_sg=$(echo "$cluster_info" | jq -r '.securityGroupIds[0]') 
+eks_sg=$(echo "$cluster_info" | jq -r '.securityGroupIds[0]') \
+echo REGION: $REGION
+echo CLUSTER: $clusters
+echo Cluster Role: $cluster_role
+echo Fargate Role: $fargate_role
+echo VPCID: $vpcid
+echo SubNet1: $subnet_1
+echo SubNet2: $subnet_2
+echo EKS SG: $eks_sg
 tfm -var "eks_cluster=$new_cluster_name" -var "eks_role=$cluster_role" -var "fargate_role=$fargate_role" -var "vpcid=$vpcid" -var "subnet_1=$subnet_1" -var "subnet_2=$subnet_2" -var "eks_sg=$eks_sg" 
 ```
 
