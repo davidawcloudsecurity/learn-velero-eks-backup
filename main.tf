@@ -41,7 +41,7 @@ variable "primary_cluster" {
   type        = string
 }
 
-data "aws_eks_cluster" "primary" {oidc_provider_url
+data "aws_eks_cluster" "primary" {
   name = var.primary_cluster
 }
 
