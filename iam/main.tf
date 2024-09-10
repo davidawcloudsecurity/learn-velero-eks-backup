@@ -7,6 +7,11 @@ variable "region" {
   type        = string
 }
 
+variable "account_id" {
+  description = "The number of the account"
+  type        = integer
+}
+
 variable "bucket_name" {
   description = "The name of the S3 bucket to be created"
   type        = string
