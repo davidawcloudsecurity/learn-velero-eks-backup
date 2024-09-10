@@ -17,6 +17,12 @@ variable "bucket_name" {
   type        = string
 }
 
+variable "eks-velero-backup" {
+  description = "The name of the eks velero backup role to be created"
+  type        = string
+  default     = "eks-velero-backup"
+}
+
 variable "primary_cluster" {
   description = "The name of the primary EKS cluster"
   type        = string
@@ -96,7 +102,7 @@ resource "aws_iam_policy" "velero_policy" {
 }
 
 data "aws_iam_role" "eks-velero-backup" {
-  name = "eks-velero-backup"
+  name = var.eks-velero-backup
 }
 
 # IAM Role for Velero in Primary Cluster
@@ -128,7 +134,7 @@ resource "aws_iam_role" "velero" {
 /* Remove as eksctl will create it
 # IAM Role for Velero in Primary Cluster
 resource "aws_iam_role" "velero_primary_role" {
-  name = "eks-velero-backup"
+  name = var.eks-velero-backup
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
