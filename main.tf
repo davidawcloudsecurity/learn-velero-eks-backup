@@ -30,6 +30,12 @@ variable "eks-velero-backup" {
   default     = "eks-velero-backup"
 }
 
+variable "eks-velero-recovery" {
+  description = "The name of the eks velero backup role to be created"
+  type        = string
+  default     = "eks-velero-recovery"
+}
+
 variable "primary_cluster" {
   description = "The name of the primary EKS cluster"
   type        = string
@@ -98,9 +104,33 @@ resource "aws_iam_policy" "velero_policy" {
 }
 
 # IAM Role for Velero in Primary Cluster
-resource "aws_iam_role" "velero" {
+resource "aws_iam_role" "velero-backup" {
 
   name = var.eks-velero-backup
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url}"
+        },
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringEquals = {
+            "${local.oidc_provider_url}:aud" = "sts.amazonaws.com",
+            "${local.oidc_provider_url}:sub" = "system:serviceaccount:velero:velero-server"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "velero-recovery" {
+
+  name = var.eks-velero-recovery
   
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
