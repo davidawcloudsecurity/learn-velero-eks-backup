@@ -235,7 +235,7 @@ resource "null_resource" "create_oicd" {
 
   provisioner "local-exec" {
     command = <<EOT
-      echo $cluster_name
+      echo ${aws_eks_cluster.recovery_eks_cluster.name}
       ARCH=amd64
       PLATFORM=$(uname -s)_$ARCH
       curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
