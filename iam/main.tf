@@ -11,17 +11,26 @@ variable "bucket_name" {
   description = "The name of the S3 bucket to be created"
   type        = string
 }
-/* Remove as eksctl will create it
+
 variable "primary_cluster" {
   description = "The name of the primary EKS cluster"
   type        = string
 }
-
+/* Remove as eksctl will create it
 variable "recovery_cluster" {
   description = "The name of the recovery EKS cluster"
   type        = string
 }
 */
+
+data "aws_eks_cluster" "primary" {
+  name = var.primary_cluster_name
+}
+
+locals {
+  oidc_provider_url = replace(data.aws_eks_cluster.primary.identity[0].oidc[0].issuer, "https://", "")
+}
+
 # S3 Bucket
 resource "aws_s3_bucket" "velero" {
   bucket = var.bucket_name
@@ -75,6 +84,31 @@ resource "aws_iam_policy" "velero_policy" {
     ]
   })
 }
+
+# IAM Role for Velero in Primary Cluster
+resource "aws_iam_role" "velero" {
+  name = "eks-velero-backup"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url}"
+        },
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringEquals = {
+            "${local.oidc_provider_url}:aud" = "sts.amazonaws.com",
+            "${local.oidc_provider_url}:sub" = "system:serviceaccount:velero:velero-server"
+          }
+        }
+      }
+    ]
+  })
+}
+
 /* Remove as eksctl will create it
 # IAM Role for Velero in Primary Cluster
 resource "aws_iam_role" "velero_primary_role" {
@@ -128,6 +162,11 @@ output "s3_bucket_name" {
 output "velero_policy_arn" {
   value = aws_iam_policy.velero_policy.arn
 }
+
+output "primary_cluster" {
+  value = aws_iam_role.velero_primary_role.arn
+}
+
 /*
 output "primary_iam_role_arn" {
   value = aws_iam_role.velero_primary_role.arn
