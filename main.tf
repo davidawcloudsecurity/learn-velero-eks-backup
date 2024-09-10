@@ -236,6 +236,13 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
   ]
 }
 
+resource "aws_eks_addon" "example" {
+  cluster_name                = aws_eks_cluster.example.name
+  addon_name                  = "coredns"
+  addon_version               = "v1.11.1-eksbuild.11" #e.g., previous version v1.9.3-eksbuild.3 and the new version is v1.10.1-eksbuild.1
+  resolve_conflicts_on_update = "OVERWRITE"
+}
+
 resource "null_resource" "create_oicd" {
 
   provisioner "local-exec" {
