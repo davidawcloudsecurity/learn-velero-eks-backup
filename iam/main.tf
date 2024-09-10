@@ -109,7 +109,7 @@ data "aws_iam_role" "eks-velero-backup" {
 resource "aws_iam_role" "velero" {
   count = data.aws_iam_role.eks-velero-backup.id != "" ? 0 : 1
 
-  name = "eks-velero-backup"
+  name = var.eks-velero-backup
   
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
