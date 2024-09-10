@@ -101,13 +101,8 @@ resource "aws_iam_policy" "velero_policy" {
   })
 }
 
-data "aws_iam_role" "eks-velero-backup" {
-  name = var.eks-velero-backup
-}
-
 # IAM Role for Velero in Primary Cluster
 resource "aws_iam_role" "velero" {
-  count = data.aws_iam_role.eks-velero-backup.id != "" ? 0 : 1
 
   name = var.eks-velero-backup
   
