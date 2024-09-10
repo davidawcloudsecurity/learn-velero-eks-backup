@@ -231,6 +231,20 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
   ]
 }
 
+resource "null_resource" "create_oicd" {
+
+  provisioner "local-exec" {
+    command = <<EOT
+      eksctl utils associate-iam-oidc-provider --cluster $cluster_name --approve
+    EOT
+  }
+
+  # Ensure this only runs when necessary
+  triggers = {
+    cluster_name = aws_eks_cluster.recovery_eks_cluster.name
+  }
+}
+
 # Fargate Profile for kube-system
 resource "aws_eks_fargate_profile" "kube_system_profile" {
   cluster_name           = aws_eks_cluster.recovery_eks_cluster.name
