@@ -36,8 +36,13 @@ locals {
   oidc_provider_url = replace(data.aws_eks_cluster.primary.identity[0].oidc[0].issuer, "https://", "")
 }
 
+data "aws_s3_bucket" "existing_bucket" {
+  bucket = var.bucket_name
+}
+
 # S3 Bucket
 resource "aws_s3_bucket" "velero" {
+  count = data.aws_s3_bucket.existing_bucket.id != "" ? 0 : 1
   bucket = var.bucket_name
 
   tags = {
@@ -90,8 +95,14 @@ resource "aws_iam_policy" "velero_policy" {
   })
 }
 
+data "aws_iam_role" "eks-velero-backup" {
+  name = "eks-velero-backup"
+}
+
 # IAM Role for Velero in Primary Cluster
 resource "aws_iam_role" "velero" {
+  count = data.aws_iam_role.eks-velero-backup.id != "" ? 0 : 1
+
   name = "eks-velero-backup"
   
   assume_role_policy = jsonencode({
