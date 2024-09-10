@@ -172,7 +172,7 @@ resource "aws_iam_role" "velero_recovery_role" {
 */
 # Outputs
 output "s3_bucket_name" {
-  value = aws_s3_bucket.velero.bucket
+  value = var.bucket_name
 }
 
 output "velero_policy_arn" {
