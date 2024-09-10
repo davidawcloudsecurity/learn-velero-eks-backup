@@ -24,7 +24,7 @@ variable "recovery_cluster" {
 */
 
 data "aws_eks_cluster" "primary" {
-  name = var.primary_cluster_name
+  name = var.primary_cluster
 }
 
 locals {
@@ -164,7 +164,7 @@ output "velero_policy_arn" {
 }
 
 output "primary_cluster" {
-  value = aws_iam_role.velero_primary_role.arn
+  value = var.primary_cluster
 }
 
 /*
