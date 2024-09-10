@@ -14,6 +14,114 @@ variable "cluster_version" {
   default = 1.24
 }
 
+variable "account_id" {
+  description = "The number of the account"
+  type        = number
+}
+
+variable "bucket_name" {
+  description = "The name of the S3 bucket to be created"
+  type        = string
+}
+
+variable "eks-velero-backup" {
+  description = "The name of the eks velero backup role to be created"
+  type        = string
+  default     = "eks-velero-backup"
+}
+
+variable "primary_cluster" {
+  description = "The name of the primary EKS cluster"
+  type        = string
+}
+
+data "aws_eks_cluster" "primary" {
+  name = var.primary_cluster
+}
+
+locals {
+  oidc_provider_url = replace(data.aws_eks_cluster.primary.identity[0].oidc[0].issuer, "https://", "")
+}
+
+# S3 Bucket
+resource "aws_s3_bucket" "velero" {
+  bucket = var.bucket_name
+
+  tags = {
+    Name = "Velero Backup Bucket"
+  }
+}
+
+# IAM Policy for Velero
+resource "aws_iam_policy" "velero_policy" {
+  name        = "VeleroAccessPolicy"
+  description = "Policy to allow Velero to perform backup and recovery operations"
+  policy      = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "ec2:DescribeVolumes",
+          "ec2:DescribeSnapshots",
+          "ec2:CreateTags",
+          "ec2:CreateVolume",
+          "ec2:CreateSnapshot",
+          "ec2:DeleteSnapshot"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:PutObject",
+          "s3:AbortMultipartUpload",
+          "s3:ListMultipartUploadParts"
+        ],
+        Resource = [
+          "arn:aws:s3:::${var.bucket_name}/*"
+        ]
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "arn:aws:s3:::${var.bucket_name}"
+        ]
+      }
+    ]
+  })
+}
+
+# IAM Role for Velero in Primary Cluster
+resource "aws_iam_role" "velero" {
+
+  name = var.eks-velero-backup
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url}"
+        },
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringEquals = {
+            "${local.oidc_provider_url}:aud" = "sts.amazonaws.com",
+            "${local.oidc_provider_url}:sub" = "system:serviceaccount:velero:velero-server"
+          }
+        }
+      }
+    ]
+  })
+}
+
 # Data sources to get existing resources
 data "aws_iam_role" "eks_role" {
   name = var.eks_role
@@ -163,4 +271,17 @@ provider "kubernetes" {
 
 data "aws_eks_cluster_auth" "auth" {
   name = aws_eks_cluster.eks_cluster.name
+}
+
+# Outputs
+output "s3_bucket_name" {
+  value = var.bucket_name
+}
+
+output "velero_policy_arn" {
+  value = aws_iam_policy.velero_policy.arn
+}
+
+output "primary_cluster" {
+  value = var.primary_cluster
 }
