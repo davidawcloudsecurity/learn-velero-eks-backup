@@ -126,6 +126,9 @@ resource "aws_iam_role" "velero-backup" {
       }
     ]
   })
+  managed_policy_arns = [
+    aws_iam_policy.velero_policy.arn
+  ]
 }
 
 resource "aws_iam_role" "velero-recovery" {
@@ -150,6 +153,9 @@ resource "aws_iam_role" "velero-recovery" {
       }
     ]
   })
+  managed_policy_arns = [
+    aws_iam_policy.velero_policy.arn
+  ]
 }
 
 # Data sources to get existing resources
