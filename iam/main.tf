@@ -9,7 +9,7 @@ variable "region" {
 
 variable "account_id" {
   description = "The number of the account"
-  type        = integer
+  type        = number
 }
 
 variable "bucket_name" {
