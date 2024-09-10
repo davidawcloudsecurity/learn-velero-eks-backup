@@ -41,12 +41,17 @@ variable "primary_cluster" {
   type        = string
 }
 
-data "aws_eks_cluster" "primary" {
+data "aws_eks_cluster" "primary" {oidc_provider_url
   name = var.primary_cluster
 }
 
+data "aws_eks_cluster" "recovery" {
+  name = var.recovery_eks_cluster
+}
+
 locals {
-  oidc_provider_url = replace(data.aws_eks_cluster.primary.identity[0].oidc[0].issuer, "https://", "")
+  oidc_provider_url_primary = replace(data.aws_eks_cluster.primary.identity[0].oidc[0].issuer, "https://", "")
+  oidc_provider_url_recovery = replace(data.aws_eks_cluster.recovery.identity[0].oidc[0].issuer, "https://", "")
 }
 
 # S3 Bucket
@@ -114,13 +119,13 @@ resource "aws_iam_role" "velero-backup" {
       {
         Effect = "Allow",
         Principal = {
-          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url}"
+          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url_primary}"
         },
         Action = "sts:AssumeRoleWithWebIdentity",
         Condition = {
           StringEquals = {
-            "${local.oidc_provider_url}:aud" = "sts.amazonaws.com",
-            "${local.oidc_provider_url}:sub" = "system:serviceaccount:velero:velero-server"
+            "${local.oidc_provider_url_primary}:aud" = "sts.amazonaws.com",
+            "${local.oidc_provider_url_primary}:sub" = "system:serviceaccount:velero:velero-server"
           }
         }
       }
@@ -141,13 +146,13 @@ resource "aws_iam_role" "velero-recovery" {
       {
         Effect = "Allow",
         Principal = {
-          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url}"
+          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url_recovery}"
         },
         Action = "sts:AssumeRoleWithWebIdentity",
         Condition = {
           StringEquals = {
-            "${local.oidc_provider_url}:aud" = "sts.amazonaws.com",
-            "${local.oidc_provider_url}:sub" = "system:serviceaccount:velero:velero-server"
+            "${local.oidc_provider_url_recovery}:aud" = "sts.amazonaws.com",
+            "${local.oidc_provider_url_recovery}:sub" = "system:serviceaccount:velero:velero-server"
           }
         }
       }
