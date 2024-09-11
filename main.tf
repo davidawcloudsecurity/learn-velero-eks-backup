@@ -49,19 +49,6 @@ variable "primary_cluster" {
   type        = string
 }
 
-data "aws_eks_cluster" "primary" {
-  name = var.primary_cluster
-}
-
-data "aws_eks_cluster" "recovery" {
-  name = var.recovery_eks_cluster
-}
-
-locals {
-  oidc_provider_url_primary = replace(data.aws_eks_cluster.primary.identity[0].oidc[0].issuer, "https://", "")
-  oidc_provider_url_recovery = replace(data.aws_eks_cluster.recovery.identity[0].oidc[0].issuer, "https://", "")
-}
-
 # S3 Bucket
 resource "aws_s3_bucket" "velero" {
   bucket = var.bucket_name
@@ -392,4 +379,20 @@ output "velero_policy_arn" {
 
 output "primary_cluster" {
   value = var.primary_cluster
+}
+
+data "aws_eks_cluster" "primary" {
+  name = var.primary_cluster
+}
+
+data "aws_eks_cluster" "recovery" {
+  name = var.recovery_eks_cluster
+  depends_on = [
+      aws_eks_cluster.recovery_eks_cluster.id
+    ]
+}
+
+locals {
+  oidc_provider_url_primary = replace(data.aws_eks_cluster.primary.identity[0].oidc[0].issuer, "https://", "")
+  oidc_provider_url_recovery = replace(data.aws_eks_cluster.recovery.identity[0].oidc[0].issuer, "https://", "")
 }
