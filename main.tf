@@ -364,7 +364,7 @@ configuration:
     provider: aws
   volumeSnapshotLocation:
   - config:
-      region: ${var.region}
+      region: ${region_code}
     provider: aws
 initContainers:
 - name: velero-plugin-for-aws
@@ -394,7 +394,7 @@ configuration:
     provider: aws
   volumeSnapshotLocation:
   - config:
-      region: ${var.region}
+      region: $var.region
     provider: aws
 initContainers:
 - name: velero-plugin-for-aws
