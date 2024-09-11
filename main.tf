@@ -225,71 +225,14 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
   ]
 }
 
+/* remove because it generates byitself
 resource "aws_eks_addon" "example" {
   cluster_name                = aws_eks_cluster.recovery_eks_cluster.name
   addon_name                  = "coredns"
   addon_version               = "v1.11.1-eksbuild.11"
   resolve_conflicts_on_update = "OVERWRITE"
 }
-
-resource "null_resource" "create_oicd" {
-
-  provisioner "local-exec" {
-    command = <<EOT
-      echo ${aws_eks_cluster.recovery_eks_cluster.name}
-      ARCH=amd64
-      PLATFORM=$(uname -s)_$ARCH
-      curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
-      tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
-      sudo mv /tmp/eksctl /usr/local/bin
-      eksctl utils associate-iam-oidc-provider --cluster ${aws_eks_cluster.recovery_eks_cluster.name} --approve
-      curl -sLO "https://get.helm.sh/helm-v3.15.4-linux-amd64.tar.gz"
-      tar -xzvf helm-v3.15.4-linux-amd64.tar.gz -C /tmp && rm helm-v3.15.4-linux-amd64.tar.gz
-      sudo mv /tmp/linux-amd64/helm /usr/local/bin
-      curl -sLO "https://github.com/vmware-tanzu/velero/releases/download/v1.14.1/velero-v1.14.1-linux-amd64.tar.gz"
-      tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
-      sudo mv /tmp/velero-v1.14.1-linux-amd64/velero /usr/local/bin
-      helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
-      cat <<EOF > values.yaml
-configuration:
-  backupStorageLocation:
-  - bucket: ${var.bucket_name}
-    provider: aws
-  volumeSnapshotLocation:
-  - config:
-      region: ${var.region}
-    provider: aws
-initContainers:
-- name: velero-plugin-for-aws
-  image: velero/velero-plugin-for-aws:v1.7.1
-  volumeMounts:
-  - mountPath: /target
-    name: plugins
-credentials:
-  useSecret: false
-serviceAccount:
-  server:
-    annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::${var.account_id}:role/eks-velero-backup"
-# Add tolerations under the pod specification (server) section
-pod:
-  server:
-    tolerations:
-    - key: "eks.amazonaws.com/compute-type"
-      operator: "Equal"
-      value: "fargate"
-      effect: "NoSchedule"      
-EOF
-      helm uninstall velero
-      helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
-    EOT
-  }
-
-  # Ensure this only runs when necessary
-  triggers = {
-    fargate_profile = aws_eks_fargate_profile.velero
-  }
-}
+*/
 
 # Fargate Profile for kube-system
 resource "aws_eks_fargate_profile" "kube_system_profile" {
@@ -394,4 +337,63 @@ data "aws_eks_cluster" "recovery" {
 locals {
   oidc_provider_url_primary = replace(data.aws_eks_cluster.primary.identity[0].oidc[0].issuer, "https://", "")
   oidc_provider_url_recovery = replace(data.aws_eks_cluster.recovery.identity[0].oidc[0].issuer, "https://", "")
+}
+
+resource "null_resource" "create_oicd" {
+
+  provisioner "local-exec" {
+    command = <<EOT
+      echo ${aws_eks_cluster.recovery_eks_cluster.name}
+      ARCH=amd64
+      PLATFORM=$(uname -s)_$ARCH
+      curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
+      tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+      sudo mv /tmp/eksctl /usr/local/bin
+      eksctl utils associate-iam-oidc-provider --cluster ${aws_eks_cluster.recovery_eks_cluster.name} --approve
+      curl -sLO "https://get.helm.sh/helm-v3.15.4-linux-amd64.tar.gz"
+      tar -xzvf helm-v3.15.4-linux-amd64.tar.gz -C /tmp && rm helm-v3.15.4-linux-amd64.tar.gz
+      sudo mv /tmp/linux-amd64/helm /usr/local/bin
+      curl -sLO "https://github.com/vmware-tanzu/velero/releases/download/v1.14.1/velero-v1.14.1-linux-amd64.tar.gz"
+      tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
+      sudo mv /tmp/velero-v1.14.1-linux-amd64/velero /usr/local/bin
+      helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
+      cat <<EOF > values.yaml
+configuration:
+  backupStorageLocation:
+  - bucket: ${var.bucket_name}
+    provider: aws
+  volumeSnapshotLocation:
+  - config:
+      region: ${var.region}
+    provider: aws
+initContainers:
+- name: velero-plugin-for-aws
+  image: velero/velero-plugin-for-aws:v1.7.1
+  volumeMounts:
+  - mountPath: /target
+    name: plugins
+credentials:
+  useSecret: false
+serviceAccount:
+  server:
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::${var.account_id}:role/eks-velero-backup"
+# Add tolerations under the pod specification (server) section
+pod:
+  server:
+    tolerations:
+    - key: "eks.amazonaws.com/compute-type"
+      operator: "Equal"
+      value: "fargate"
+      effect: "NoSchedule"      
+EOF
+      helm uninstall velero
+      helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
+    EOT
+  }
+
+  # Ensure this only runs when necessary
+  triggers = {
+    fargate_profile = aws_eks_fargate_profile.velero
+  }
 }
