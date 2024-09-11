@@ -266,11 +266,11 @@ resource "null_resource" "create_oicd" {
       cat <<EOF > values.yaml
 configuration:
   backupStorageLocation:
-  - bucket: $BUCKET
+  - bucket: ${var.bucket_name}
     provider: aws
   volumeSnapshotLocation:
   - config:
-      region: $REGION_CODE
+      region: ${var.region}
     provider: aws
 initContainers:
 - name: velero-plugin-for-aws
@@ -283,7 +283,7 @@ credentials:
 serviceAccount:
   server:
     annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::${ACCOUNT}:role/eks-velero-backup"
+      eks.amazonaws.com/role-arn: "arn:aws:iam::${var.account_id}:role/eks-velero-backup"
 # Add tolerations under the pod specification (server) section
 pod:
   server:
