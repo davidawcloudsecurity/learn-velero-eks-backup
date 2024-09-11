@@ -280,6 +280,7 @@ pod:
       value: "fargate"
       effect: "NoSchedule"      
 EOF
+      helm uninstall velero
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
     EOT
   }
