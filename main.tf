@@ -394,6 +394,6 @@ EOF
 
   # Ensure this only runs when necessary
   triggers = {
-    fargate_profile = aws_eks_fargate_profile.velero
+    fargate_profile = aws_eks_fargate_profile.velero.id
   }
 }
