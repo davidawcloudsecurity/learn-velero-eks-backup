@@ -387,9 +387,7 @@ data "aws_eks_cluster" "primary" {
 
 data "aws_eks_cluster" "recovery" {
   name = var.recovery_eks_cluster
-  depends_on = [
-      aws_eks_cluster.recovery_eks_cluster.id
-    ]
+  depends_on = [aws_eks_cluster.recovery_eks_cluster]
 }
 
 locals {
