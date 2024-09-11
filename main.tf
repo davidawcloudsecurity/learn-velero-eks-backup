@@ -10,6 +10,14 @@ variable "eks_role" {
   type = string
 }
 
+variable "aws_load_balancer_role" {
+  type = string
+}
+
+data "aws_iam_role" "aws_load_balancer_role" {
+  name = var.aws_load_balancer_role
+}
+
 variable "cluster_version" {
   default = 1.24
 }
@@ -184,7 +192,6 @@ variable "vpcid" {
 
 data "aws_vpc" "vpc" {
   id = var.vpcid
-  #  id = "vpc-0c264b217b411a08a"
 }
 
 variable "subnet_1" {
@@ -192,7 +199,6 @@ variable "subnet_1" {
 }
 data "aws_subnet" "subnet_1" {
   id = var.subnet_1
-  #  id = "subnet-02098f8ac2178bbea"
 }
 
 variable "subnet_2" {
@@ -201,16 +207,13 @@ variable "subnet_2" {
 
 data "aws_subnet" "subnet_2" {
   id = var.subnet_2
-  #  id = "subnet-0749ab2836b8fac6e"
 }
 
 variable "eks_sg" {
-
 }
 
 data "aws_security_group" "eks_sg" {
   id = var.eks_sg
-  #  id = "sg-08567c7350c264402"
 }
 
 variable "recovery_eks_cluster" {
@@ -219,7 +222,6 @@ variable "recovery_eks_cluster" {
 resource "aws_eks_cluster" "recovery_eks_cluster" {
   name = var.recovery_eks_cluster
   version = var.cluster_version
-  #  name     = "f92sh02"
   role_arn = data.aws_iam_role.eks_role.arn
 
   vpc_config {
