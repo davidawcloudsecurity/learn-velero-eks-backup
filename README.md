@@ -285,10 +285,10 @@ tfm -var primary_cluster=$primary_cluster -var "recovery_eks_cluster=$recovery_c
 bucket_name=$(aws eks list-clusters --query clusters[0] --output text);
 primary_cluster=$(aws eks list-clusters --query clusters[0] --output text);
 recovery_cluster=$(aws eks list-clusters --query clusters[1] --output text);
-region_code=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]');
+region=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]');
 account_id=$(aws sts get-caller-identity --query Account --output text)
-tfm -var account_id=$account_id -var region=$region_code -var bucket_name=$bucket_name-eks-velero-backups -var primary_cluster=$primary_cluster -var recovery_cluster=$recovery_cluster
-tfa -var account_id=$account_id -var region=$region_code -var bucket_name=$bucket_name-eks-velero-backups -var primary_cluster=$primary_cluster -var recovery_cluster=$recovery_cluster
+tfm -var account_id=$account_id -var region=$region -var bucket_name=$bucket_name-eks-velero-backups -var primary_cluster=$primary_cluster -var recovery_cluster=$recovery_cluster
+tfa -var account_id=$account_id -var region=$region -var bucket_name=$bucket_name-eks-velero-backups -var primary_cluster=$primary_cluster -var recovery_cluster=$recovery_cluster
 ```
 
 ## Troubleshooting
