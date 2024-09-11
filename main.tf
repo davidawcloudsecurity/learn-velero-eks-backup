@@ -387,8 +387,8 @@ pod:
       value: "fargate"
       effect: "NoSchedule"      
 EOF
-      helm uninstall velero
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
+      kubectl rollout restart deploy/coredns -n kube-system
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
     EOT
   }
