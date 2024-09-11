@@ -427,6 +427,7 @@ EOF2
       --pod-execution-role-arn $(aws iam get-role --role-name ${var.fargate_role} --query Role.Arn --output text) \
       --subnets var.subnet_1 var.subnet_2 \
       --selectors namespace=velero
+      helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
     EOT
   }
 
