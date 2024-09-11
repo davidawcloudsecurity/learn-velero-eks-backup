@@ -228,7 +228,7 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
 resource "aws_eks_addon" "example" {
   cluster_name                = aws_eks_cluster.recovery_eks_cluster.name
   addon_name                  = "coredns"
-  addon_version               = "v1.10.1-eksbuild.1"
+  addon_version               = "v1.11.1-eksbuild.11"
   resolve_conflicts_on_update = "OVERWRITE"
 }
 
@@ -286,7 +286,7 @@ EOF
 
   # Ensure this only runs when necessary
   triggers = {
-    cluster_name = aws_eks_cluster.recovery_eks_cluster.name
+    fargate_profile = aws_eks_fargate_profile.velero
   }
 }
 
