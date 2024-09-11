@@ -357,7 +357,7 @@ resource "null_resource" "create_oicd" {
       tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
       sudo mv /tmp/velero-v1.14.1-linux-amd64/velero /usr/local/bin
       helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
-      cat <<EOF > values.yaml
+      cat <<EOF > values_recovery.yaml
 configuration:
   backupStorageLocation:
   - bucket: ${var.bucket_name}
@@ -377,7 +377,7 @@ credentials:
 serviceAccount:
   server:
     annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::${var.account_id}:role/eks-velero-backup"
+      eks.amazonaws.com/role-arn: "arn:aws:iam::${var.account_id}:role/eks-velero-recovery"
 # Add tolerations under the pod specification (server) section
 pod:
   server:
@@ -389,7 +389,7 @@ pod:
 EOF
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
-      helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
+      helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
     EOT
   }
 
