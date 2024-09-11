@@ -309,7 +309,7 @@ resource "aws_eks_fargate_profile" "kube_system_profile" {
 # Fargate Profile for platform-service
 resource "aws_eks_fargate_profile" "platform_service_profile" {
   cluster_name           = aws_eks_cluster.recovery_eks_cluster.name
-  fargate_profile_name   = "platform-service"
+  fargate_profile_name   = "platform_service"
   pod_execution_role_arn = data.aws_iam_role.fargate_role.arn
 
   selector {
