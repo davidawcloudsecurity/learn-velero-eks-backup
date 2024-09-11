@@ -364,7 +364,7 @@ configuration:
     provider: aws
   volumeSnapshotLocation:
   - config:
-      region: $var.region
+      region: ${var.region}
     provider: aws
 initContainers:
 - name: velero-plugin-for-aws
@@ -394,7 +394,7 @@ configuration:
     provider: aws
   volumeSnapshotLocation:
   - config:
-      region: ${var.account_id}
+      region: ${var.region}
     provider: aws
 initContainers:
 - name: velero-plugin-for-aws
@@ -417,6 +417,7 @@ pod:
       value: "fargate"
       effect: "NoSchedule"      
 EOF2
+      echo "${var.region} $var.region"
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
