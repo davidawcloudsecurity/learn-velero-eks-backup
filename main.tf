@@ -418,15 +418,17 @@ pod:
 EOF2
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
-      helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml      
+      helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
+      aws eks update-kubeconfig --region ${var.region} --name ${var.primary_cluster}
       aws eks create-fargate-profile \
       --cluster-name ${var.primary_cluster} \
       --fargate-profile-name velero \
       --pod-execution-role-arn $(aws iam get-role --role-name ${var.fargate_role} --query Role.Arn --output text | sed 's/[", ]//g') \
       --subnets ${var.subnet_1} ${var.subnet_2} \
       --selectors namespace=velero      
-      chmod 700 EKSASSUMEROLE.md
-      ./EKSASSUMEROLE.md
+      cat EKSASSUMEROLE.md; mv EKSASSUMEROLE.md EKSASSUMEROLE.sh
+      chmod 700 EKSASSUMEROLE.sh
+      ./EKSASSUMEROLE.sh
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
     EOT
   }
