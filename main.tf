@@ -357,7 +357,37 @@ resource "null_resource" "create_oicd" {
       tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
       sudo mv /tmp/velero-v1.14.1-linux-amd64/velero /usr/local/bin
       helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
-      cat <<EOF > values_recovery.yaml
+      cat <<EOF > values.yaml
+configuration:
+  backupStorageLocation:
+  - bucket: ${var.bucket_name}
+    provider: aws
+  volumeSnapshotLocation:
+  - config:
+      region: ${var.region}
+    provider: aws
+initContainers:
+- name: velero-plugin-for-aws
+  image: velero/velero-plugin-for-aws:v1.7.1
+  volumeMounts:
+  - mountPath: /target
+    name: plugins
+credentials:
+  useSecret: false
+serviceAccount:
+  server:
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::${var.account_id}:role/eks-velero-backup"
+# Add tolerations under the pod specification (server) section
+pod:
+  server:
+    tolerations:
+    - key: "eks.amazonaws.com/compute-type"
+      operator: "Equal"
+      value: "fargate"
+      effect: "NoSchedule"      
+EOF
+      cat <<EOF2 > values_recovery.yaml
 configuration:
   backupStorageLocation:
   - bucket: ${var.bucket_name}
@@ -386,10 +416,17 @@ pod:
       operator: "Equal"
       value: "fargate"
       effect: "NoSchedule"      
-EOF
+EOF2
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
+      aws eks update-kubeconfig --region ${var.region} --name ${var.primary_cluster}
+      aws eks create-fargate-profile \
+      --cluster-name var.primary_cluster \
+      --fargate-profile-name velero \
+      --pod-execution-role-arn $(aws iam get-role --role-name ${var.fargate_role} --query Role.Arn --output text) \
+      --subnets var.subnet_1 var.subnet_2 \
+      --selectors namespace=velero
     EOT
   }
 
