@@ -417,10 +417,10 @@ pod:
       value: "fargate"
       effect: "NoSchedule"      
 EOF2
-      aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
+      aws eks update-kubeconfig --region ${region_code} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
-      aws eks update-kubeconfig --region ${var.region} --name ${var.primary_cluster}
+      aws eks update-kubeconfig --region ${region_code} --name ${var.primary_cluster}
       aws eks create-fargate-profile \
       --cluster-name var.primary_cluster \
       --fargate-profile-name velero \
