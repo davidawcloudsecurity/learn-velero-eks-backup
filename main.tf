@@ -420,6 +420,7 @@ EOF2
       kubectl rollout restart deploy/coredns -n kube-system
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
       aws eks update-kubeconfig --region ${var.region} --name ${var.primary_cluster}
+      echo word $(aws iam get-role --role-name ${var.fargate_role} --query Role.Arn --output text | sed 's/[", ]//g')
       aws eks create-fargate-profile \
       --cluster-name var.primary_cluster \
       --fargate-profile-name velero \
