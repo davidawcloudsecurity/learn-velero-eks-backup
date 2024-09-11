@@ -256,6 +256,44 @@ resource "null_resource" "create_oicd" {
       tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
       sudo mv /tmp/eksctl /usr/local/bin
       eksctl utils associate-iam-oidc-provider --cluster ${aws_eks_cluster.recovery_eks_cluster.name} --approve
+      curl -sLO "https://get.helm.sh/helm-v3.15.4-linux-amd64.tar.gz"
+      tar -xzvf helm-v3.15.4-linux-amd64.tar.gz -C /tmp && rm helm-v3.15.4-linux-amd64.tar.gz
+      sudo mv /tmp/linux-amd64/helm /usr/local/bin
+      curl -sLO "https://github.com/vmware-tanzu/velero/releases/download/v1.14.1/velero-v1.14.1-linux-amd64.tar.gz"
+      tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
+      sudo mv /tmp/velero-v1.14.1-linux-amd64/velero /usr/local/bin
+      helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
+      cat <<EOF > values.yaml
+configuration:
+  backupStorageLocation:
+  - bucket: $BUCKET
+    provider: aws
+  volumeSnapshotLocation:
+  - config:
+      region: $REGION_CODE
+    provider: aws
+initContainers:
+- name: velero-plugin-for-aws
+  image: velero/velero-plugin-for-aws:v1.7.1
+  volumeMounts:
+  - mountPath: /target
+    name: plugins
+credentials:
+  useSecret: false
+serviceAccount:
+  server:
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::${ACCOUNT}:role/eks-velero-backup"
+# Add tolerations under the pod specification (server) section
+pod:
+  server:
+    tolerations:
+    - key: "eks.amazonaws.com/compute-type"
+      operator: "Equal"
+      value: "fargate"
+      effect: "NoSchedule"      
+      EOF
+      helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
     EOT
   }
 
