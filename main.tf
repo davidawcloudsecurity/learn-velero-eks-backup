@@ -12,6 +12,7 @@ variable "eks_role" {
 
 variable "aws_load_balancer_role" {
   type = string
+  default = "aws-load-balancer-controller-pd-g2xmdp7"
 }
 
 data "aws_iam_role" "aws_load_balancer_role" {
@@ -170,7 +171,6 @@ variable "fargate_role" {
 
 data "aws_iam_role" "fargate_role" {
   name = var.fargate_role
-  #  name = "eks-fargate-system-profile-pd-g2xmdp7"
 }
 
 variable "vpcid" {
