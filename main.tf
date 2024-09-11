@@ -12,7 +12,6 @@ variable "eks_role" {
 
 variable "aws_load_balancer_role" {
   type = string
-  default = "aws-load-balancer-controller-pd-g2xmdp7"
 }
 
 data "aws_iam_role" "aws_load_balancer_role" {
