@@ -388,7 +388,7 @@ pod:
       effect: "NoSchedule"      
 EOF
       helm uninstall velero
-      aws eks update-kubeconfig --region ${var.region_code} --name ${var.recovery_eks_cluster}
+      aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
     EOT
   }
