@@ -436,9 +436,7 @@ EOF2
         echo "Create the backup"
         velero backup create ${var.primary_cluster}-backup      
         while true; do
-          if ! kubectl cluster-info > /dev/null 2>&1; then
-            exit 1
-          elif kubectl logs deploy/velero -n velero | grep -E "Updating backup's final status.*${var.primary_cluster}-backup" > /dev/null 2>&1; then
+          if kubectl logs deploy/velero -n velero | grep -E "Updating backup's final status.*${var.primary_cluster}-backup" > /dev/null 2>&1; then
             break
           else
             sleep 5
@@ -446,6 +444,9 @@ EOF2
         done
       fi
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
+      if ! kubectl cluster-info > /dev/null 2>&1; then
+        exit 1
+      fi    
       if ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
         kubectl rollout restart deploy/coredns -n kube-system
         helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml      
