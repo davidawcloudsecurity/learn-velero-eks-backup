@@ -432,7 +432,9 @@ EOF2
         echo "Create the backup"
         velero backup create ${var.primary_cluster}-backup      
         while true; do
-          if kubectl logs deploy/velero -n velero | grep -E "Updating backup's final status.*${var.primary_cluster}-backup" > /dev/null 2>&1; then
+          if ! kubectl cluster-info > /dev/null 2>&1; then
+            exit 1
+          elif kubectl logs deploy/velero -n velero | grep -E "Updating backup's final status.*${var.primary_cluster}-backup" > /dev/null 2>&1; then
             break
           else
             sleep 5
