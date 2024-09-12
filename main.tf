@@ -346,7 +346,6 @@ resource "null_resource" "create_oicd" {
       if ! kubectl cluster-info > /dev/null 2>&1; then
         exit 1
       fi
-      echo ${aws_eks_cluster.recovery_eks_cluster.name}
       ARCH=amd64
       PLATFORM=$(uname -s)_$ARCH
       curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
