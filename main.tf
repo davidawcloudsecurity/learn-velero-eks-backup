@@ -442,6 +442,14 @@ EOF2
         kubectl rollout restart deploy/coredns -n kube-system
         helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml      
       fi
+      while true; do
+        if kubectl get pods -n velero | grep Running > /dev/nulk 2>&1; then
+          echo "Velero pods are running"
+          break
+        else
+          sleep 5
+        fi
+      done
       echo "Create the restore"
       velero restore create ${var.primary_cluster}-restore \
       --from-backup ${var.primary_cluster}-backup    
