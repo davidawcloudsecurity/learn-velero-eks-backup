@@ -441,7 +441,6 @@ EOF2
       if ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
         kubectl rollout restart deploy/coredns -n kube-system
         helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
-      else
         echo "Create the restore"
         velero restore create ${var.primary_cluster}-restore \
         --from-backup ${var.primary_cluster}-backup
