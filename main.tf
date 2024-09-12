@@ -449,6 +449,9 @@ EOF2
         velero restore create ${var.primary_cluster}-restore \
         --from-backup ${var.primary_cluster}-backup        
       fi
+      echo "Create the restore"
+      velero restore create ${var.primary_cluster}-restore \
+      --from-backup ${var.primary_cluster}-backup    
     EOT
   }
 
