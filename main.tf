@@ -343,6 +343,9 @@ resource "null_resource" "create_oicd" {
 
   provisioner "local-exec" {
     command = <<EOT
+      if ! kubectl cluster-info > /dev/null 2>&1; then
+        exit 1
+      fi
       echo ${aws_eks_cluster.recovery_eks_cluster.name}
       ARCH=amd64
       PLATFORM=$(uname -s)_$ARCH
@@ -416,11 +419,7 @@ pod:
       operator: "Equal"
       value: "fargate"
       effect: "NoSchedule"      
-EOF2
-      if ! kubectl cluster-info > /dev/null 2>&1; then
-        exit 1
-      fi
-      
+EOF2      
       if ! $(aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero) > /dev/null 2>&1 && ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
         echo "Velero namespace/node does not exist, proceeding to create Fargate profile"
         aws eks create-fargate-profile \
