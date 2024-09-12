@@ -440,14 +440,7 @@ EOF2
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       if ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
         kubectl rollout restart deploy/coredns -n kube-system
-        helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
-        echo "Create the restore"
-        velero restore create ${var.primary_cluster}-restore \
-        --from-backup ${var.primary_cluster}-backup        
-      else
-        echo "Create the restore"
-        velero restore create ${var.primary_cluster}-restore \
-        --from-backup ${var.primary_cluster}-backup        
+        helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml      
       fi
       echo "Create the restore"
       velero restore create ${var.primary_cluster}-restore \
