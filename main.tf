@@ -443,7 +443,11 @@ EOF2
         helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
         echo "Create the restore"
         velero restore create ${var.primary_cluster}-restore \
-        --from-backup ${var.primary_cluster}-backup
+        --from-backup ${var.primary_cluster}-backup        
+      else
+        echo "Create the restore"
+        velero restore create ${var.primary_cluster}-restore \
+        --from-backup ${var.primary_cluster}-backup        
       fi
     EOT
   }
