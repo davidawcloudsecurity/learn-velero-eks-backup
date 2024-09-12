@@ -443,7 +443,7 @@ EOF2
         helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml      
       fi
       while true; do
-        if kubectl get pods -n velero | grep Running > /dev/nulk 2>&1; then
+        if kubectl get pods -n velero | grep Running > /dev/null 2>&1; then
           echo "Velero pods are running"
           break
         else
