@@ -426,10 +426,18 @@ EOF2
         --fargate-profile-name velero \
         --pod-execution-role-arn $(aws iam get-role --role-name ${var.fargate_role} --query Role.Arn --output text | sed 's/[", ]//g') \
         --subnets ${var.subnet_1} ${var.subnet_2} \
-        --selectors namespace=velero      
-        helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
+        --selectors namespace=velero
+        while true; do
+          if ! $(aws eks list-fargate-profiles --cluster-name f92sh --query fargateProfileNames --output text | grep velero) > /dev/null 2>&1; then
+            sleep 5
+          else
+            helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
+            break
+          fi
+        done
+      else
+        echo "Velero namespace exists, skipping Fargate profile creation"      
       fi
-      echo "Velero namespace exists, skipping Fargate profile creation"
       if ! kubectl get backup ${var.primary_cluster}-backup -n velero; then
         echo "Create the backup"
         velero backup create ${var.primary_cluster}-backup      
