@@ -428,7 +428,7 @@ EOF2
         helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
       fi
       echo "Velero namespace exists, skipping Fargate profile creation"
-      if ! kubectl get backup ${var.primary_cluster}-backup -n velero > /dev/null 2>&1; then
+      if ! kubectl get backup ${var.primary_cluster}-backup -n velero; then
         echo "Create the backup"
         velero backup create ${var.primary_cluster}-backup      
         while true; do
