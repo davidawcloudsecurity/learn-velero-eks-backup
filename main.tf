@@ -416,19 +416,27 @@ pod:
       value: "fargate"
       effect: "NoSchedule"      
 EOF2
-      aws eks update-kubeconfig --region ${var.region} --name ${var.primary_cluster}      
-      aws eks create-fargate-profile \
-      --cluster-name ${var.primary_cluster} \
-      --fargate-profile-name velero \
-      --pod-execution-role-arn $(aws iam get-role --role-name ${var.fargate_role} --query Role.Arn --output text | sed 's/[", ]//g') \
-      --subnets ${var.subnet_1} ${var.subnet_2} \
-      --selectors namespace=velero      
-      helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
+      aws eks update-kubeconfig --region ${var.region} --name ${var.primary_cluster}
+      if ! kubectl get ns velero > /dev/null 2>&1 && ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
+        echo "Velero namespace does not exist, proceeding to create Fargate profile"
+        aws eks create-fargate-profile \
+        --cluster-name ${var.primary_cluster} \
+        --fargate-profile-name velero \
+        --pod-execution-role-arn $(aws iam get-role --role-name ${var.fargate_role} --query Role.Arn --output text | sed 's/[", ]//g') \
+        --subnets ${var.subnet_1} ${var.subnet_2} \
+        --selectors namespace=velero      
+        helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
+      else
+        echo "Velero namespace exists, skipping Fargate profile creation"
+      fi
       echo "Create the backup"
+      velero backup create ${var.primary_cluster}-backup
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
       echo "Create the restore"
+      velero restore create ${var.primary_cluster}-restore \
+      --from-backup ${var.primary_cluster}-backup
     EOT
   }
 
