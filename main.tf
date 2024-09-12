@@ -417,8 +417,8 @@ pod:
       effect: "NoSchedule"      
 EOF2
       aws eks update-kubeconfig --region ${var.region} --name ${var.primary_cluster}
-      if ! kubectl get ns velero > /dev/null 2>&1 && ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
-        echo "Velero namespace does not exist, proceeding to create Fargate profile"
+      if ! $(aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero) > /dev/null 2>&1 && ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
+        echo "Velero namespace/node does not exist, proceeding to create Fargate profile"
         aws eks create-fargate-profile \
         --cluster-name ${var.primary_cluster} \
         --fargate-profile-name velero \
