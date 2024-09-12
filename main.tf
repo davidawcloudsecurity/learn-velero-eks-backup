@@ -425,11 +425,10 @@ EOF2
         --subnets ${var.subnet_1} ${var.subnet_2} \
         --selectors namespace=velero      
         helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
-      else
-        echo "Velero namespace exists, skipping Fargate profile creation"
-        echo "Create the backup"
-        velero backup create ${var.primary_cluster}-backup
       fi
+      echo "Velero namespace exists, skipping Fargate profile creation"
+      echo "Create the backup"
+      velero backup create ${var.primary_cluster}-backup      
       while true; do
         if kubectl logs deploy/velero -n velero | grep -E "Updating backup's final status.*${var.primary_cluster}-backup" > /dev/null 2>&1; then
           break
