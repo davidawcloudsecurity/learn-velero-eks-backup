@@ -51,8 +51,8 @@ variable "primary_cluster" {
 
 # S3 Bucket
 resource "aws_s3_bucket" "velero" {
-  bucket = var.bucket_name
-
+  bucket        = var.bucket_name
+  force_destroy = true
   tags = {
     Name = "Velero Backup Bucket"
   }
