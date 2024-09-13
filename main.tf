@@ -419,7 +419,7 @@ EOF2
       if aws eks update-kubeconfig --region "${var.region}" --name "${var.primary_cluster}"; then
           echo "Kubeconfig updated successfully."
           if ! kubectl get pods -A > /dev/null 2>&1; then
-            echo "Not logged in to cluster. Exiting"
+            echo "No permission to log in to cluster. Exiting"
             exit 1
           fi
           if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero > /dev/null 2>&1; then
