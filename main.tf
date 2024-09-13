@@ -418,11 +418,11 @@ pod:
 EOF2
       if aws eks update-kubeconfig --region "${var.region}" --name "${var.primary_cluster}"; then
           echo "Kubeconfig updated successfully."
-          if ! kubectl get pods -A; then
+          if ! kubectl get pods -A > /dev/null 2>&1; then
             echo "Not logged in to cluster. Exiting"
             exit 1
           fi
-          if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero; then
+          if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero > /dev/null 2>&1; then
             echo "Velero namespace does not exist, proceeding to create Fargate profile for velero"
             aws eks create-fargate-profile \
             --cluster-name ${var.primary_cluster} \
@@ -431,7 +431,7 @@ EOF2
             --subnets ${var.subnet_1} ${var.subnet_2} \
             --selectors namespace=velero
             while true; do
-              if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero; then
+              if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero > /dev/null 2>&1; then
                 sleep 5
               else
                 helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
