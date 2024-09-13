@@ -449,6 +449,7 @@ EOF2
         if velero backup get | grep Completed > /dev/null 2>&1; then
           echo "Velero backup completed"
           break
+        fi
       done
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
