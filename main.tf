@@ -469,6 +469,13 @@ EOF2
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
+      while true; do
+        if kubectl get pods -n velero | grep Running > /dev/null 2>&1; then
+          echo "Velero pods running"
+          break
+        fi
+        echo "Waiting for velero pods to be running"
+      done
       echo "Create the restore"
       velero restore create ${var.primary_cluster}-restore \
       --from-backup ${var.primary_cluster}-backup
