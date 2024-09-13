@@ -443,12 +443,14 @@ EOF2
           # Retry logic or additional commands can be added here
           exit 1
       fi
-      echo "Create the backup"
+      echo "Check if ${var.primary_cluster}-backup exist"
       if velero backup get ${var.primary_cluster}-backup; then
         velero backup delete ${var.primary_cluster}-backup --confirm
         kubectl -n velero delete backup ${var.primary_cluster}-backup
       else
+        echo "Create the backup"      
         velero backup create ${var.primary_cluster}-backup
+        echo 
       fi
       while true; do
         if velero backup get | grep Completed > /dev/null 2>&1; then
