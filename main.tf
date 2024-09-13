@@ -444,7 +444,12 @@ EOF2
           exit 1
       fi
       echo "Create the backup"
-      velero backup create ${var.primary_cluster}-backup
+      if velero backup get ${var.primary_cluster}-backup; then
+        velero backup delete ${var.primary_cluster}-backup
+        kubectl -n velero delete backup ${var.primary_cluster}-backup
+      else
+        velero backup create ${var.primary_cluster}-backup
+      fi
       while true; do
         if velero backup get | grep Completed > /dev/null 2>&1; then
           echo "Velero backup completed"
