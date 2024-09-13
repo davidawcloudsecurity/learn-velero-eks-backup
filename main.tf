@@ -416,8 +416,15 @@ pod:
       value: "fargate"
       effect: "NoSchedule"      
 EOF2
-      aws eks update-kubeconfig --region ${var.region} --name ${var.primary_cluster}
-      if ! kubectl get ns velero > /dev/null 2>&1 && ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
+        if aws eks update-kubeconfig --region "${var.region}" --name "${var.primary_cluster}"; then
+            echo "Kubeconfig updated successfully."
+        else
+            echo "Failed to update kubeconfig."
+            # Handle failure case, e.g., retry or exit with an error
+            # Retry logic or additional commands can be added here
+            exit 1
+        fi
+        if ! kubectl get ns velero > /dev/null 2>&1 && ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
         echo "Velero namespace does not exist, proceeding to create Fargate profile"
         aws eks create-fargate-profile \
         --cluster-name ${var.primary_cluster} \
