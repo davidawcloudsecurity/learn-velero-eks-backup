@@ -465,6 +465,7 @@ EOF2
           break
         fi
         echo "Waiting for velero backup to be completed"
+        sleep 10
       done
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
@@ -475,6 +476,7 @@ EOF2
           break
         fi
         echo "Waiting for velero pods to be running"
+        sleep 10
       done
       echo "Create the restore"
       velero restore create ${var.primary_cluster}-restore \
@@ -487,6 +489,7 @@ EOF2
         echo "Waiting for velero restore to be completed"
         sleep 10
       done
+      # echo append oidc to aws-load-balancer
     EOT
   }
 
