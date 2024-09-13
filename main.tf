@@ -416,34 +416,29 @@ pod:
       value: "fargate"
       effect: "NoSchedule"      
 EOF2
-      if aws eks update-kubeconfig --region "${var.region}" --name "${var.primary_cluster}"; then
-          echo "Kubeconfig updated successfully."
-          if ! kubectl get pods -A > /dev/null 2>&1; then
-            echo "No permission to log in to cluster. Exiting"
-            exit 1
-          fi
-          if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero > /dev/null 2>&1; then
-            echo "Velero namespace does not exist, proceeding to create Fargate profile for velero"
-            aws eks create-fargate-profile \
-            --cluster-name ${var.primary_cluster} \
-            --fargate-profile-name velero \
-            --pod-execution-role-arn $(aws iam get-role --role-name ${var.fargate_role} --query Role.Arn --output text | sed 's/[", ]//g') \
-            --subnets ${var.subnet_1} ${var.subnet_2} \
-            --selectors namespace=velero
-            while true; do
-              if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero > /dev/null 2>&1; then
-                sleep 5
-              else
-                helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
-                break
-              fi                      
-            done
-          else
-            echo "Velero namespace exists, skipping Fargate profile creation"
-            helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
-          fi            
+      if kubectl get pods -A > /dev/null 2>&1; then
+        if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero > /dev/null 2>&1; then
+          echo "Velero namespace does not exist, proceeding to create Fargate profile for velero"
+          aws eks create-fargate-profile \
+          --cluster-name ${var.primary_cluster} \
+          --fargate-profile-name velero \
+          --pod-execution-role-arn $(aws iam get-role --role-name ${var.fargate_role} --query Role.Arn --output text | sed 's/[", ]//g') \
+          --subnets ${var.subnet_1} ${var.subnet_2} \
+          --selectors namespace=velero
+          while true; do
+            if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero > /dev/null 2>&1; then
+              sleep 5
+            else
+              helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
+              break
+            fi                      
+          done
+        else
+          echo "Velero namespace exists, skipping Fargate profile creation"
+          helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
+        fi            
       else
-          echo "Failed to update kubeconfig."
+          echo "Failed to login cluster: ${var.primary_cluster}."
           # Handle failure case, e.g., retry or exit with an error
           # Retry logic or additional commands can be added here
           exit 1
