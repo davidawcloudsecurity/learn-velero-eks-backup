@@ -455,6 +455,11 @@ EOF2
           echo "Velero backup completed"
           break
         fi
+        if ! kubectl get pods -A | grep Running > /dev/null 2>&1; then
+          echo "Restart velero pods"
+          kubectl rollout restart deploy/velero -n velero
+        fi
+        echo "Waiting for velero backup to be completed"
       done
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
