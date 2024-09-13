@@ -443,6 +443,10 @@ EOF2
           # Retry logic or additional commands can be added here
           exit 1
       fi
+      if ! kubectl get pods -A | grep Running > /dev/null 2>&1; then
+        echo "Restart velero pods"
+        kubectl rollout restart deploy/velero -n velero
+      fi
       echo "Check if ${var.primary_cluster}-backup exist"
       if velero backup get ${var.primary_cluster}-backup; then
         velero backup delete ${var.primary_cluster}-backup --confirm
@@ -459,10 +463,6 @@ EOF2
         if velero backup get | grep Completed > /dev/null 2>&1; then
           echo "Velero backup completed"
           break
-        fi
-        if ! kubectl get pods -A | grep Running > /dev/null 2>&1; then
-          echo "Restart velero pods"
-          kubectl rollout restart deploy/velero -n velero
         fi
         echo "Waiting for velero backup to be completed"
       done
