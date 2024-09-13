@@ -258,7 +258,6 @@ alias k=kubectl; alias tf="terraform"; alias tfa="terraform apply --auto-approve
 ```
 ```bash
 bucket_name=$(aws eks list-clusters --query clusters[0] --output text);
-primary_cluster=$(aws eks list-clusters --query clusters[0] --output text);
 REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]');
 account_id=$(aws sts get-caller-identity --query Account --output text)
 primary_cluster=$(aws eks list-clusters --query "clusters[0]" --region $REGION --output text);
