@@ -389,37 +389,6 @@ pod:
       value: "fargate"
       effect: "NoSchedule"      
 EOF
-      cat <<EOF2 > values_recovery.yaml
-configuration:
-  backupStorageLocation:
-  - bucket: ${var.bucket_name}
-    provider: aws
-  volumeSnapshotLocation:
-  - config:
-      region: ${var.region}
-    provider: aws
-initContainers:
-- name: velero-plugin-for-aws
-  image: velero/velero-plugin-for-aws:v1.7.1
-  volumeMounts:
-  - mountPath: /target
-    name: plugins
-credentials:
-  useSecret: false
-serviceAccount:
-  server:
-    annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::${var.account_id}:role/eks-velero-recovery"
-# Add tolerations under the pod specification (server) section
-pod:
-  server:
-    tolerations:
-    - key: "eks.amazonaws.com/compute-type"
-      operator: "Equal"
-      value: "fargate"
-      effect: "NoSchedule"      
-EOF2
-
       if ! $(aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero) > /dev/null 2>&1 && ! kubectl get deploy/velero -n velero > /dev/null 2>&1; then
         echo "Velero namespace/node does not exist, proceeding to create Fargate profile"
         aws eks create-fargate-profile \
@@ -451,6 +420,36 @@ EOF2
         done
       fi
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
+      cat <<EOF2 > values_recovery.yaml
+configuration:
+  backupStorageLocation:
+  - bucket: ${var.bucket_name}
+    provider: aws
+  volumeSnapshotLocation:
+  - config:
+      region: ${var.region}
+    provider: aws
+initContainers:
+- name: velero-plugin-for-aws
+  image: velero/velero-plugin-for-aws:v1.7.1
+  volumeMounts:
+  - mountPath: /target
+    name: plugins
+credentials:
+  useSecret: false
+serviceAccount:
+  server:
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::${var.account_id}:role/eks-velero-recovery"
+# Add tolerations under the pod specification (server) section
+pod:
+  server:
+    tolerations:
+    - key: "eks.amazonaws.com/compute-type"
+      operator: "Equal"
+      value: "fargate"
+      effect: "NoSchedule"      
+EOF2
       if ! kubectl cluster-info > /dev/null 2>&1; then
         exit 1
       fi    
