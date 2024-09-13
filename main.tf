@@ -443,7 +443,7 @@ EOF2
           # Retry logic or additional commands can be added here
           exit 1
       fi
-      if ! kubectl get pods -A | grep Running > /dev/null 2>&1; then
+      if ! kubectl get pods -n velero | grep Running > /dev/null 2>&1; then
         echo "Restart velero pods"
         kubectl rollout restart deploy/velero -n velero
       fi
