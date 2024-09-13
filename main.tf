@@ -427,7 +427,7 @@ EOF2
           --selectors namespace=velero
           while true; do
             if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero > /dev/null 2>&1; then
-              sleep 5
+              sleep 10
             else
               helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
               break
@@ -485,6 +485,7 @@ EOF2
           break
         fi
         echo "Waiting for velero restore to be completed"
+        sleep 10
       done
     EOT
   }
