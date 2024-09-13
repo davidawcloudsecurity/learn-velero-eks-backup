@@ -472,6 +472,13 @@ EOF2
       echo "Create the restore"
       velero restore create ${var.primary_cluster}-restore \
       --from-backup ${var.primary_cluster}-backup
+      while true; do
+        if velero restore get | grep Completed > /dev/null 2>&1; then
+          echo "Velero restore completed"
+          break
+        fi
+        echo "Waiting for velero restore to be completed"
+      done
     EOT
   }
 
