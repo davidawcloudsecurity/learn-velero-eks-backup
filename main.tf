@@ -445,7 +445,7 @@ EOF2
       fi
       echo "Create the backup"
       if velero backup get ${var.primary_cluster}-backup; then
-        velero backup delete ${var.primary_cluster}-backup
+        velero backup delete ${var.primary_cluster}-backup --confirm
         kubectl -n velero delete backup ${var.primary_cluster}-backup
       else
         velero backup create ${var.primary_cluster}-backup
