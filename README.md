@@ -280,7 +280,9 @@ echo SubNet1: $subnet_1; \
 echo SubNet2: $subnet_2; \
 echo EKS SG: $eks_sg; \
 echo AWS Load Balancer: $aws_lb_role
-tfm -var primary_cluster=$primary_cluster -var "recovery_eks_cluster=$recovery_cluster" -var "eks_role=$cluster_role" -var "fargate_role=$fargate_role" -var "vpcid=$vpcid" -var "subnet_1=$subnet_1" -var "subnet_2=$subnet_2" -var "eks_sg=$eks_sg" -var "account_id=$account_id" -var "region=$REGION" -var "aws_load_balancer_role=$aws_lb_role" -var "bucket_name=${bucket_name}-eks-velero-backups"
+```
+```bash
+tfm -var primary_cluster=$primary_cluster -var "recovery_eks_cluster=$recovery_cluster" -var "eks_role=$cluster_role" -var "fargate_role=$fargate_role" -var "vpcid=$vpcid" -var "subnet_1=$subnet_1" -var "subnet_2=$subnet_2" -var "eks_sg=$eks_sg" -var "account_id=$account_id" -var "region=$REGION" -var "aws_load_balancer_role=$aws_lb_role" -var "bucket_name=${bucket_name}-eks-velero-backups" -var "cluster_version=1.30"
 ```
 ```bash
 bucket_name=$(aws eks list-clusters --query clusters[0] --output text);
