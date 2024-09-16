@@ -543,6 +543,8 @@ EOF2
         sleep 10
       done
       echo "Create the restore"
+      velero backup get
+      velero restore get
       velero restore create ${var.primary_cluster}-restore \
       --from-backup ${var.primary_cluster}-backup
       while true; do
@@ -551,8 +553,8 @@ EOF2
           break
         elif velero restore get | grep Fail > /dev/null 2>&1; then
           echo "Velero restore failed. Restarting"
-          velero restore delete ${var.primary_cluster}-restore --confirm
-          kubectl -n velero delete restore ${var.primary_cluster}-restore
+          # velero restore delete ${var.primary_cluster}-restore --confirm
+          # kubectl -n velero delete restore ${var.primary_cluster}-restore
           velero restore create ${var.primary_cluster}-restore \
           --from-backup ${var.primary_cluster}-backup
         else
