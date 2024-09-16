@@ -547,6 +547,7 @@ EOF2
         else
           echo "Waiting for velero restore to be completed"
           sleep 10
+        fi
       done
       # echo append oidc to aws-load-balancer
       # echo $(aws iam list-roles --query Roles[*].RoleName | grep balancer | sed 's/[", ]//g')
