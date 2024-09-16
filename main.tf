@@ -563,10 +563,10 @@ EOF2
           break
         elif velero restore get | grep Fail > /dev/null 2>&1; then
           echo "Velero restore failed. Restarting"
-          # velero restore delete ${var.primary_cluster}-restore --confirm
-          # kubectl -n velero delete restore ${var.primary_cluster}-restore
-          # velero restore create ${var.primary_cluster}-restore \
-          # --from-backup ${var.primary_cluster}-backup
+          velero restore delete ${var.primary_cluster}-restore --confirm
+          sleep 30
+          velero restore create ${var.primary_cluster}-restore \
+          --from-backup ${var.primary_cluster}-backup
         else
           echo "Waiting for velero restore to be completed"
           kubectl get pods -n velero
