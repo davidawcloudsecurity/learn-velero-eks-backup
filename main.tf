@@ -565,8 +565,11 @@ EOF2
           echo "Velero restore failed. Restarting"
           velero restore delete ${var.primary_cluster}-restore --confirm
           sleep 30
-          velero restore create ${var.primary_cluster}-restore \
+          velero backup get
+          velero restore create ${var.primary_cluster}-restore02 \
           --from-backup ${var.primary_cluster}-backup
+          sleep 30
+          break
         else
           echo "Waiting for velero restore to be completed"
           kubectl get pods -n velero
