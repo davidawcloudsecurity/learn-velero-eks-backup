@@ -435,6 +435,7 @@ EOF2
           done
         else
           echo "Velero namespace exists, skipping Fargate profile creation"
+          echo "Helm install velero in primary cluster"
           helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
         fi            
       else
@@ -469,6 +470,7 @@ EOF2
       done
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
+      echo "Helm install velero in recovery cluster"
       helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values_recovery.yaml
       while true; do
         if kubectl get pods -n velero | grep Running > /dev/null 2>&1; then
