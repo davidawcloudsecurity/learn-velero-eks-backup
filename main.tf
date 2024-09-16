@@ -381,7 +381,7 @@ resource "null_resource" "create_oicd" {
   provisioner "local-exec" {
     command = <<EOT
       echo ${aws_eks_cluster.recovery_eks_cluster.name}
-      if kubectl config current-context | grep -w ${var.primary_cluster}; then
+      if ! kubectl config current-context | grep -w ${var.primary_cluster}; then
         echo "Failed to login cluster: ${var.primary_cluster}."
         exit 1
       fi      
