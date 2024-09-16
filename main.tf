@@ -354,7 +354,7 @@ resource "null_resource" "check_velero_backup_recovery_role" {
       echo "Check if VeleroAccessPolicy gets appends to eks-velero-backup/recovery"
       VELERO_BACKUP_ROLE_NAME=${var.eks-velero-backup}
       VELERO_RECOVERY_ROLE_NAME=${var.eks-velero-recovery}
-      POLICY_ARN="arn:aws:iam::aws:policy/VeleroAccessPolicy"
+      POLICY_ARN="arn:aws:iam::${var.account_id}:policy/VeleroAccessPolicy"
       
       # Check if the policy is attached to the role
       if ! aws iam list-attached-role-policies --role-name "$VELERO_BACKUP_ROLE_NAME" | grep "$POLICY_ARN" > /dev/null 2>&1; then
