@@ -491,10 +491,10 @@ EOF2
         echo "Waiting for velero restore to be completed"
         sleep 10
       done
-      #echo append oidc to aws-load-balancer
-      echo $(aws iam list-roles --query Roles[*].RoleName | grep balancer | sed 's/[", ]//g')
+      # echo append oidc to aws-load-balancer
+      # echo $(aws iam list-roles --query Roles[*].RoleName | grep balancer | sed 's/[", ]//g')
       echo ${var.aws_load_balancer_role}
-      cat $(aws iam get-role --role-name aws-load-balancer-controller --query 'Role.AssumeRolePolicyDocument' --output json > trust-policy.json)
+      cat $(aws iam get-role --role-name ${var.aws_load_balancer_role} --query 'Role.AssumeRolePolicyDocument' --output json > trust-policy.json)
 
     EOT
   }
