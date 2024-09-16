@@ -532,8 +532,8 @@ EOF2
           velero restore create ${var.primary_cluster}-restore \
           --from-backup ${var.primary_cluster}-backup
         else
-        echo "Waiting for velero restore to be completed"
-        sleep 10
+          echo "Waiting for velero restore to be completed"
+          sleep 10
       done
       # echo append oidc to aws-load-balancer
       # echo $(aws iam list-roles --query Roles[*].RoleName | grep balancer | sed 's/[", ]//g')
