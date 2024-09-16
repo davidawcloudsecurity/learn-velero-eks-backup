@@ -390,7 +390,7 @@ resource "null_resource" "create_oicd" {
       echo "Determine whether an IAM OIDC provider with your cluster's issuer ID is already in your account."
       oidc_id=$(aws eks describe-cluster --name ${aws_eks_cluster.recovery_eks_cluster.name} --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
       # Check if the OIDC provider exists, and if not, associate it
-      if ! aws iam list-open-id-connect-providers | grep -q "${oidc_id}"; then
+      if ! aws iam list-open-id-connect-providers | grep -q "$oidc_id"; then
         echo "OIDC provider not found, associating IAM OIDC provider with the cluster."
         eksctl utils associate-iam-oidc-provider --cluster ${aws_eks_cluster.recovery_eks_cluster.name} --approve
       else
