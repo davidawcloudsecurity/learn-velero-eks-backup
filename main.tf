@@ -386,7 +386,11 @@ resource "null_resource" "create_oicd" {
       curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
       tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
       sudo mv /tmp/eksctl /usr/local/bin
-      eksctl utils associate-iam-oidc-provider --cluster ${aws_eks_cluster.recovery_eks_cluster.name} --approve
+      echo "Determine whether an IAM OIDC provider with your cluster's issuer ID is already in your account."
+      oidc_id=$(aws eks describe-cluster --name ${aws_eks_cluster.recovery_eks_cluster.name} --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+      if ! aws iam list-open-id-connect-providers | grep $oidc_id | cut -d "/" -f4 > /dev/null 2>&1; then
+        eksctl utils associate-iam-oidc-provider --cluster ${aws_eks_cluster.recovery_eks_cluster.name} --approve
+      fi
       curl -sLO "https://get.helm.sh/helm-v3.15.4-linux-amd64.tar.gz"
       tar -xzvf helm-v3.15.4-linux-amd64.tar.gz -C /tmp && rm helm-v3.15.4-linux-amd64.tar.gz
       sudo mv /tmp/linux-amd64/helm /usr/local/bin
