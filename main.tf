@@ -502,13 +502,22 @@ EOF2
         velero backup create ${var.primary_cluster}-backup
         echo 
       fi
+      # Exit if timeout reached
+      SLEEP_TIME=10
+      COUNTER=0
+      MAX_CHECKS=720
       while true; do
         if velero backup get | grep Completed > /dev/null 2>&1; then
           echo "Velero backup completed"
           break
+        elif [ "${COUNTER}" -ge "${MAX_CHECKS}" ]; then
+          echo "Reached maximum checks (${MAX_CHECKS}). Exiting."
+          exit 1
+        else
+          echo "Waiting for velero backup to be completed"
+          sleep ${SLEEP_TIME}
+          COUNTER=$((COUNTER+1))
         fi
-        echo "Waiting for velero backup to be completed"
-        sleep 10
       done
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
