@@ -346,6 +346,34 @@ locals {
   oidc_provider_url_recovery = replace(data.aws_eks_cluster.recovery.identity[0].oidc[0].issuer, "https://", "")
 }
 
+resource "null_resource" "check_velero_backup_recovery_role" {
+  provisioner "local-exec" {
+    command = <<EOT
+      echo "Check if VeleroAccessPolicy gets appends to eks-velero-backup/recovery"
+      VELERO_BACKUP_ROLE_NAME=var.eks-velero-backup
+      VELERO_RECOVERY_ROLE_NAME=var.eks-velero-recovery
+      POLICY_ARN="arn:aws:iam::aws:policy/VeleroAccessPolicy"
+      
+      # Check if the policy is attached to the role
+      if ! aws iam list-attached-role-policies --role-name "$VELERO_BACKUP_ROLE_NAME" | grep "$POLICY_ARN" > /dev/null 2>&1; then
+          echo "Attaching policy $POLICY_ARN to $VELERO_BACKUP_ROLE_NAME"
+          aws iam attach-role-policy --role-name "$ROLE_NAME" --policy-arn "$POLICY_ARN"  
+          if ! aws iam list-attached-role-policies --role-name "$VELERO_RECOVERY_ROLE_NAME" | grep "$POLICY_ARN" > /dev/null 2>&1; then
+              echo "Attaching policy $POLICY_ARN to $VELERO_RECOVERY_ROLE_NAME"
+              aws iam attach-role-policy --role-name "$ROLE_NAME" --policy-arn "$POLICY_ARN"
+          fi
+      else
+          echo "Policy $POLICY_ARN is already attached to $VELERO_BACKUP_ROLE_NAME / $VELERO_RECOVERY_ROLE_NAME"    
+      fi
+    EOT
+  }
+
+  # Ensure this only runs when necessary
+  triggers = {
+    velero_backup_recovery_role = aws_iam_policy.velero_policy.arn
+  }
+}
+
 resource "null_resource" "create_oicd" {
 
   provisioner "local-exec" {
