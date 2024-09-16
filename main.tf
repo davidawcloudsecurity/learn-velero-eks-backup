@@ -352,8 +352,8 @@ resource "null_resource" "check_velero_backup_recovery_role" {
   provisioner "local-exec" {
     command = <<EOT
       echo "Check if VeleroAccessPolicy gets appends to eks-velero-backup/recovery"
-      VELERO_BACKUP_ROLE_NAME=var.eks-velero-backup
-      VELERO_RECOVERY_ROLE_NAME=var.eks-velero-recovery
+      VELERO_BACKUP_ROLE_NAME=${var.eks-velero-backup}
+      VELERO_RECOVERY_ROLE_NAME=${var.eks-velero-recovery}
       POLICY_ARN="arn:aws:iam::aws:policy/VeleroAccessPolicy"
       
       # Check if the policy is attached to the role
