@@ -359,10 +359,10 @@ resource "null_resource" "check_velero_backup_recovery_role" {
       # Check if the policy is attached to the role
       if ! aws iam list-attached-role-policies --role-name "$VELERO_BACKUP_ROLE_NAME" | grep "$POLICY_ARN" > /dev/null 2>&1; then
           echo "Attaching policy $POLICY_ARN to $VELERO_BACKUP_ROLE_NAME"
-          aws iam attach-role-policy --role-name "$ROLE_NAME" --policy-arn "$POLICY_ARN"  
+          aws iam attach-role-policy --role-name "$VELERO_BACKUP_ROLE_NAME" --policy-arn "$POLICY_ARN"  
           if ! aws iam list-attached-role-policies --role-name "$VELERO_RECOVERY_ROLE_NAME" | grep "$POLICY_ARN" > /dev/null 2>&1; then
               echo "Attaching policy $POLICY_ARN to $VELERO_RECOVERY_ROLE_NAME"
-              aws iam attach-role-policy --role-name "$ROLE_NAME" --policy-arn "$POLICY_ARN"
+              aws iam attach-role-policy --role-name "$VELERO_RECOVERY_ROLE_NAME" --policy-arn "$POLICY_ARN"
           fi
       else
           echo "Policy $POLICY_ARN is already attached to $VELERO_BACKUP_ROLE_NAME / $VELERO_RECOVERY_ROLE_NAME"    
