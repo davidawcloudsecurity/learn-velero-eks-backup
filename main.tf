@@ -555,19 +555,22 @@ EOF2
       velero restore get
       velero restore create ${var.primary_cluster}-restore \
       --from-backup ${var.primary_cluster}-backup
+      kubectl logs deploy/velero -n velero --tail=10
       while true; do
         if velero restore get | grep Completed > /dev/null 2>&1; then
           echo "Velero restore completed"
+          kubectl logs deploy/velero -n velero --tail=5
           break
         elif velero restore get | grep Fail > /dev/null 2>&1; then
           echo "Velero restore failed. Restarting"
           # velero restore delete ${var.primary_cluster}-restore --confirm
           # kubectl -n velero delete restore ${var.primary_cluster}-restore
-          velero restore create ${var.primary_cluster}-restore \
-          --from-backup ${var.primary_cluster}-backup
+          # velero restore create ${var.primary_cluster}-restore \
+          # --from-backup ${var.primary_cluster}-backup
         else
           echo "Waiting for velero restore to be completed"
-          kubectl logs deploy/velero -n velero --tail=10
+          kubectl get pods -n velero
+          kubectl logs deploy/velero -n velero --tail=10          
           sleep 10
         fi
       done
