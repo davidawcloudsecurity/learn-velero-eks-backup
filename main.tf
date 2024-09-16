@@ -381,6 +381,10 @@ resource "null_resource" "create_oicd" {
   provisioner "local-exec" {
     command = <<EOT
       echo ${aws_eks_cluster.recovery_eks_cluster.name}
+      if kubectl config current-context | grep -w ${var.primary_cluster}; then
+        echo "Failed to login cluster: ${var.primary_cluster}."
+        exit 1
+      fi      
       ARCH=amd64
       PLATFORM=$(uname -s)_$ARCH
       curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
