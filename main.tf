@@ -498,6 +498,13 @@ EOF2
       if ! kubectl get pods -n velero | grep Running > /dev/null 2>&1; then
         echo "Restart velero pods"
         kubectl rollout restart deploy/velero -n velero
+        while true; do
+          if kubectl get pods -n velero | grep Running; then
+            break
+          fi
+          echo "Waiting for velero pods to be running"
+          sleep 10
+        done
       fi
       echo "Check if ${var.primary_cluster}-backup exist"
       if velero backup get ${var.primary_cluster}-backup; then
