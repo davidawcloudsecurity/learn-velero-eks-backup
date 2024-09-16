@@ -103,6 +103,7 @@ resource "aws_iam_policy" "velero_policy" {
   })
 }
 
+/* Remove checks do it via aws cli instead
 data "aws_iam_role" "eks-velero-backup" {
   name  = var.eks-velero-backup
 }
@@ -110,10 +111,11 @@ data "aws_iam_role" "eks-velero-backup" {
 data "aws_iam_role" "eks-velero-recovery" {
   name = var.eks-velero-recovery
 }
+*/
 
 # IAM Role for Velero in Primary Cluster
 resource "aws_iam_role" "velero-backup" {
-  count = length(data.aws_iam_role.eks-velero-backup.arn) > 0 ? 0 : 1  # Role is not created if it exists
+#  count = length(data.aws_iam_role.eks-velero-backup.arn) > 0 ? 0 : 1  # Role is not created if it exists
   name = var.eks-velero-backup
   
   assume_role_policy = jsonencode({
@@ -140,7 +142,7 @@ resource "aws_iam_role" "velero-backup" {
 }
 
 resource "aws_iam_role" "velero-recovery" {
-  count = length(data.aws_iam_role.eks-velero-recovery.arn) > 0 ? 0 : 1  # Role is not created if it exists
+#  count = length(data.aws_iam_role.eks-velero-recovery.arn) > 0 ? 0 : 1  # Role is not created if it exists
   name = var.eks-velero-recovery
   
   assume_role_policy = jsonencode({
