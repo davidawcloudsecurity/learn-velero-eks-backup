@@ -526,7 +526,6 @@ EOF2
           exit 1
         else
           echo "Waiting for velero backup to be completed"
-          kubectl logs deploy/velero -n velero --tail=10
           sleep $SLEEP_TIME
           COUNTER=$((COUNTER+1))
         fi
@@ -543,9 +542,9 @@ EOF2
         echo "Waiting for velero pods to be running"
         sleep 10
       done
-      echo "Create the restore
-      velero backup get
-      velero restore get
+      echo "Create the restore"
+      # velero backup get
+      # velero restore get
       velero restore create ${var.primary_cluster}-restore \
       --from-backup ${var.primary_cluster}-backup
       while true; do
@@ -560,7 +559,6 @@ EOF2
           --from-backup ${var.primary_cluster}-backup
         else
           echo "Waiting for velero restore to be completed"
-          kubectl logs deploy/velero -n velero --tail=10
           sleep 10
         fi
       done
