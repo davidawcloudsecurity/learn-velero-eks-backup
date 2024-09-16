@@ -505,7 +505,7 @@ EOF2
       # Exit if timeout reached
       SLEEP_TIME=10
       COUNTER=0
-      MAX_CHECKS=720
+      MAX_CHECKS=90
       while true; do
         if velero backup get | grep Completed > /dev/null 2>&1; then
           echo "Velero backup completed"
