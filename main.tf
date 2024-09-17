@@ -574,11 +574,12 @@ EOF2
           break
         elif velero restore get | grep Fail > /dev/null 2>&1; then
           echo "Velero restore failed. Restarting"
+          velero backup-location get
           velero backup get
           velero restore get
-          velero restore create ${var.primary_cluster}-restore02 \
-          --from-backup ${var.primary_cluster}-backup
-          sleep 30
+          # velero restore create ${var.primary_cluster}-restore02 \
+          # --from-backup ${var.primary_cluster}-backup
+          # sleep 30
           break
         else
           echo "Waiting for velero restore to be completed"
