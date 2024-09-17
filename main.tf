@@ -565,7 +565,7 @@ EOF2
           fi
       done
       while true; do
-        if velero restore get | grep Completed > /dev/null 2>&1; then
+        if velero restore get | grep -q Completed || velero restore get | grep -q "restore completed"; then
           echo "Velero restore completed"
           kubectl logs deploy/velero -n velero --tail=5
           break
