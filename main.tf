@@ -541,6 +541,7 @@ EOF2
           break
         elif [ "$COUNTER" -ge "$MAX_CHECKS" ]; then
           echo "Reached maximum checks ($MAX_CHECKS). Exiting."
+          kubectl logs deploy/velero -n velero --tail=10
           exit 1
         else
           echo "Waiting for velero backup to be completed"
@@ -559,6 +560,7 @@ EOF2
           break
         fi
         echo "Waiting for velero pods to be running"
+        kubectl logs deploy/velero -n velero --tail=10
         sleep 10
       done
       echo "Create the restore"
@@ -577,9 +579,10 @@ EOF2
           velero backup-location get
           velero backup get
           velero restore get
+          kubectl logs deploy/velero -n velero --tail=10
           # velero restore create ${var.primary_cluster}-restore02 \
           # --from-backup ${var.primary_cluster}-backup
-          # sleep 30
+          sleep 30
           break
         else
           echo "Waiting for velero restore to be completed"
