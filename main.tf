@@ -575,51 +575,39 @@ EOF2
           sleep 10
         fi
       done
-      # echo append oidc to aws-load-balancer
+      echo append oidc to aws-load-balancer
       # echo $(aws iam list-roles --query Roles[*].RoleName | grep balancer | sed 's/[", ]//g')
-      echo ${var.aws_load_balancer_role}
-      cat $(aws iam get-role --role-name ${var.aws_load_balancer_role} --query 'Role.AssumeRolePolicyDocument' --output json > trust-policy.json)
       aws s3 cp terraform.tfstate s3://${var.bucket_name}; aws s3 cp terraform.tfstate.backup s3://${var.bucket_name}
       OIDC_PROVIDER=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --region ${var.region} --query "cluster.identity.oidc.issuer" --output text | sed 's/https:\/\///')
-      # Construct the full ARN
-      OIDC_ARN="arn:aws:iam::${var.account_id}:oidc-provider/${OIDC_PROVIDER}"
+      ALB_ROLE_NAME=${var.aws_load_balancer_role}
+      NEW_FEDERATED_ARN="arn:aws:iam::${var.account_id}:oidc-provider/${OIDC_PROVIDER}"
       echo "OIDC Provider ARN: $OIDC_ARN"
-/*
-ROLE_NAME="aws-load-balancer-controller"
-NEW_FEDERATED_ARN="arn:aws:iam::8913773312345:oidc-provider/oidc.eks.ap-southeast-1.amazonaws.com/id/12345CF500C0E2E2E18A93458512345"
-OIDC_PROVIDER="oidc.eks.ap-southeast-1.amazonaws.com/id/12345CF500C0E2E2E18A93458512345"
-
-# Get the existing trust policy
-# aws iam get-role --role-name $ROLE_NAME --query 'Role.AssumeRolePolicyDocument' --output json > trust-policy.json
-
-# Update the Federated principal
-jq --arg new_federated "$NEW_FEDERATED_ARN" '
-  .Statement[0].Principal.Federated |= 
-  if type == "string" then
-    [$new_federated, .]
-  elif type == "array" then
-    . + [$new_federated] | unique
-  else
-    [$new_federated]
-  end
-' trust-policy.json > updated-trust-policy.json
-
-# Update the Condition
-OIDC_PROVIDER="oidc.eks.ap-southeast-1.amazonaws.com/id/12345CF500C0E2E2E18A93458512345"
-
-jq --arg oidc "$OIDC_PROVIDER" '.Statement[0].Condition."ForAllValues:StringEquals" += {
-  ($oidc + ":sub"): [
-      "system:serviceaccount:kube-system:aws-load-balancer-controller",
-          "system:serviceaccount:platform-service:platform-sa"
-            ]
-    }' updated-trust-policy.json > updated-trust-policy-final.json
-
-
-# Update the IAM role's trust policy
-# aws iam update-assume-role-policy --role-name $ROLE_NAME --policy-document file://updated-trust-policy-final.json
-
-echo "Trust policy updated successfully."
-*/
+      echo "AWS Load Balancer Controller Role: $ALB_ROLE_NAME"
+      echo "OIDC_PROVIDER: $OIDC_PROVIDER"
+      echo "NEW_FEDERATED_ARN: $NEW_FEDERATED_ARN"
+      echo "Get the existing trust policy"
+      cat $(aws iam get-role --role-name ${var.aws_load_balancer_role} --query 'Role.AssumeRolePolicyDocument' --output json > alb_trust-policy.json)
+      echo "Update the Federated principal"
+      jq --arg new_federated "$NEW_FEDERATED_ARN" '
+        .Statement[0].Principal.Federated |= 
+        if type == "string" then
+          [$new_federated, .]
+        elif type == "array" then
+          . + [$new_federated] | unique
+        else
+          [$new_federated]
+        end
+      ' trust-policy.json > updated-trust-policy.json
+      echo "Update the Condition"      
+      jq --arg oidc "$OIDC_PROVIDER" '.Statement[0].Condition."ForAllValues:StringEquals" += {
+        ($oidc + ":sub"): [
+            "system:serviceaccount:kube-system:aws-load-balancer-controller",
+                "system:serviceaccount:platform-service:platform-sa"
+                  ]
+          }' updated-trust-policy.json > updated-trust-policy-final.json
+      echo Update the IAM role's trust policy
+      # aws iam update-assume-role-policy --role-name ${var.aws_load_balancer_role} --policy-document file://updated-trust-policy-final.json     
+      echo "Trust policy updated successfully."
     EOT
   }
 
