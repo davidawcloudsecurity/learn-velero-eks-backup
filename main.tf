@@ -580,7 +580,7 @@ EOF2
       aws s3 cp terraform.tfstate s3://${var.bucket_name}; aws s3 cp terraform.tfstate.backup s3://${var.bucket_name}
       OIDC_PROVIDER=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --region ${var.region} --query "cluster.identity.oidc.issuer" --output text | sed 's/https:\/\///')
       ALB_ROLE_NAME=${var.aws_load_balancer_role}
-      NEW_FEDERATED_ARN="arn:aws:iam::${var.account_id}:oidc-provider/${OIDC_PROVIDER}"
+      NEW_FEDERATED_ARN="arn:aws:iam::${var.account_id}:oidc-provider/$OIDC_PROVIDER"
       echo "OIDC Provider ARN: $OIDC_ARN"
       echo "AWS Load Balancer Controller Role: $ALB_ROLE_NAME"
       echo "OIDC_PROVIDER: $OIDC_PROVIDER"
