@@ -611,7 +611,7 @@ EOF2
       echo "Update the Condition"      
       jq --arg oidc "$OIDC_PROVIDER" '
         .Statement[0].Condition."ForAllValues:StringEquals" += {
-        ($oidc + ":sub"): [
+        \($oidc + ":sub"): [
         "system:serviceaccount:kube-system:aws-load-balancer-controller",
         "system:serviceaccount:platform-service:platform-sa"
         ]}
