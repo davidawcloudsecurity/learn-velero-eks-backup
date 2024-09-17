@@ -390,9 +390,7 @@ resource "null_resource" "check_velero_backup_recovery_role" {
   }
 
   # Ensure this only runs when necessary
-  triggers = {
-    velero_policy_arn = aws_iam_policy.velero_policy.arn
-  }
+  triggers = [fargate_profile = aws_eks_fargate_profile.velero.id]
 }
 
 resource "null_resource" "create_oicd" {
