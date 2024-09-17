@@ -609,12 +609,13 @@ EOF2
         end
       ' alb_trust-policy.json > updated-trust-policy.json
       echo "Update the Condition"      
-      jq --arg oidc "$OIDC_PROVIDER" '.Statement[0].Condition."ForAllValues:StringEquals" += {
+      jq --arg oidc "$OIDC_PROVIDER" '
+        .Statement[0].Condition."ForAllValues:StringEquals" += {
         ($oidc + ":sub"): [
-            "system:serviceaccount:kube-system:aws-load-balancer-controller",
-                "system:serviceaccount:platform-service:platform-sa"
-                  ]
-          }' updated-trust-policy.json > updated-trust-policy-final.json
+        "system:serviceaccount:kube-system:aws-load-balancer-controller",
+        "system:serviceaccount:platform-service:platform-sa"
+        ]}
+      ' updated-trust-policy.json > updated-trust-policy-final.json
       echo Update the IAM role's trust policy
       # aws iam update-assume-role-policy --role-name ${var.aws_load_balancer_role} --policy-document file://updated-trust-policy-final.json     
       echo "Trust policy updated successfully."
