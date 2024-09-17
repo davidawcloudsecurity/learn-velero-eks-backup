@@ -383,7 +383,7 @@ resource "null_resource" "check_velero_backup_recovery_role" {
   triggers = [
     velero_policy_arn = aws_iam_policy.velero_policy.arn,
     velero_backup_arn = aws_iam_policy.velero-backup.arn,
-    velero_recovery_arn = aws_iam_policy.velero-recovery.arn,
+    velero_recovery_arn = aws_iam_policy.velero-recovery.arn
   ]
 }
 
