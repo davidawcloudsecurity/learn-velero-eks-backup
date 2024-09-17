@@ -380,11 +380,11 @@ resource "null_resource" "check_velero_backup_recovery_role" {
   }
 
   # Ensure this only runs when necessary
-  triggers = [
+  triggers = {
     velero_policy_arn = aws_iam_policy.velero_policy.arn,
     velero_backup_arn = aws_iam_policy.velero-backup.arn,
     velero_recovery_arn = aws_iam_policy.velero-recovery.arn
-  ]
+  }
 }
 
 resource "null_resource" "create_oicd" {
