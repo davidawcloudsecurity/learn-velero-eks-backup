@@ -607,7 +607,7 @@ EOF2
         else
           [$new_federated]
         end
-      ' trust-policy.json > updated-trust-policy.json
+      ' alb_trust-policy.json > updated-trust-policy.json
       echo "Update the Condition"      
       jq --arg oidc "$OIDC_PROVIDER" '.Statement[0].Condition."ForAllValues:StringEquals" += {
         ($oidc + ":sub"): [
