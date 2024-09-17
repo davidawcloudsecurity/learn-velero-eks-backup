@@ -616,7 +616,7 @@ EOF2
                   ]
           }' updated-trust-policy.json > updated-trust-policy-final.json
       echo "Update the IAM role's trust policy"
-      # aws iam update-assume-role-policy --role-name ${var.aws_load_balancer_role} --policy-document file://updated-trust-policy-final.json     
+      aws iam update-assume-role-policy --role-name ${var.aws_load_balancer_role} --policy-document file://updated-trust-policy-final.json
       echo "Trust policy updated successfully."
     EOT
   }
