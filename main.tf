@@ -549,7 +549,7 @@ EOF2
         sleep 10
       done
       echo "Create the restore"
-      While true; do
+      while true; do
         if velero backup get; then
           velero restore create ${var.primary_cluster}-restore \
           --from-backup ${var.primary_cluster}-backup
