@@ -549,11 +549,16 @@ EOF2
         sleep 10
       done
       echo "Create the restore"
-      velero backup get
-      velero restore get
-      velero restore create ${var.primary_cluster}-restore \
-      --from-backup ${var.primary_cluster}-backup
-      kubectl logs deploy/velero -n velero --tail=10
+      While true; do
+        if velero backup get; then
+          velero restore create ${var.primary_cluster}-restore \
+          --from-backup ${var.primary_cluster}-backup
+          break          
+        fi
+        echo "Waiting for backup get to sync"        
+        sleep 30
+        kubectl logs deploy/velero -n velero --tail=10 | grep "Successfully synced backup into cluster"
+      done
       while true; do
         if velero restore get | grep Completed > /dev/null 2>&1; then
           echo "Velero restore completed"
