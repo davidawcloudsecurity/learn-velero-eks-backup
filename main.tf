@@ -113,61 +113,6 @@ data "aws_iam_role" "eks-velero-recovery" {
 }
 */
 
-# IAM Role for Velero in Primary Cluster
-resource "aws_iam_role" "velero-backup" {
-#  count = length(data.aws_iam_role.eks-velero-backup.arn) > 0 ? 0 : 1  # Role is not created if it exists
-  name = var.eks-velero-backup
-  
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url_primary}"
-        },
-        Action = "sts:AssumeRoleWithWebIdentity",
-        Condition = {
-          StringEquals = {
-            "${local.oidc_provider_url_primary}:aud" = "sts.amazonaws.com",
-            "${local.oidc_provider_url_primary}:sub" = "system:serviceaccount:velero:velero-server"
-          }
-        }
-      }
-    ]
-  })
-  managed_policy_arns = [
-    aws_iam_policy.velero_policy.arn
-  ]
-}
-
-resource "aws_iam_role" "velero-recovery" {
-#  count = length(data.aws_iam_role.eks-velero-recovery.arn) > 0 ? 0 : 1  # Role is not created if it exists
-  name = var.eks-velero-recovery
-  
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url_recovery}"
-        },
-        Action = "sts:AssumeRoleWithWebIdentity",
-        Condition = {
-          StringEquals = {
-            "${local.oidc_provider_url_recovery}:aud" = "sts.amazonaws.com",
-            "${local.oidc_provider_url_recovery}:sub" = "system:serviceaccount:velero:velero-server"
-          }
-        }
-      }
-    ]
-  })
-  managed_policy_arns = [
-    aws_iam_policy.velero_policy.arn
-  ]
-}
-
 # Data sources to get existing resources
 data "aws_iam_role" "eks_role" {
   name = var.eks_role
@@ -355,6 +300,61 @@ data "aws_eks_cluster" "recovery" {
 locals {
   oidc_provider_url_primary = replace(data.aws_eks_cluster.primary.identity[0].oidc[0].issuer, "https://", "")
   oidc_provider_url_recovery = replace(data.aws_eks_cluster.recovery.identity[0].oidc[0].issuer, "https://", "")
+}
+
+# IAM Role for Velero in Primary Cluster
+resource "aws_iam_role" "velero-backup" {
+#  count = length(data.aws_iam_role.eks-velero-backup.arn) > 0 ? 0 : 1  # Role is not created if it exists
+  name = var.eks-velero-backup
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url_primary}"
+        },
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringEquals = {
+            "${local.oidc_provider_url_primary}:aud" = "sts.amazonaws.com",
+            "${local.oidc_provider_url_primary}:sub" = "system:serviceaccount:velero:velero-server"
+          }
+        }
+      }
+    ]
+  })
+  managed_policy_arns = [
+    aws_iam_policy.velero_policy.arn
+  ]
+}
+
+resource "aws_iam_role" "velero-recovery" {
+#  count = length(data.aws_iam_role.eks-velero-recovery.arn) > 0 ? 0 : 1  # Role is not created if it exists
+  name = var.eks-velero-recovery
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = "arn:aws:iam::${var.account_id}:oidc-provider/${local.oidc_provider_url_recovery}"
+        },
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringEquals = {
+            "${local.oidc_provider_url_recovery}:aud" = "sts.amazonaws.com",
+            "${local.oidc_provider_url_recovery}:sub" = "system:serviceaccount:velero:velero-server"
+          }
+        }
+      }
+    ]
+  })
+  managed_policy_arns = [
+    aws_iam_policy.velero_policy.arn
+  ]
 }
 
 resource "null_resource" "check_velero_backup_recovery_role" {
