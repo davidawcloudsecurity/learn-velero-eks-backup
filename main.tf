@@ -357,9 +357,15 @@ resource "aws_iam_role" "velero-recovery" {
   ]
 }
 
-resource "null_resource" "check_velero_backup_recovery_role" {
+resource "null_resource" "create_oicd" {
+
   provisioner "local-exec" {
     command = <<EOT
+      echo ${aws_eks_cluster.recovery_eks_cluster.name}
+      if ! kubectl config current-context | grep -w ${var.primary_cluster}; then
+        echo "Failed to login cluster: ${var.primary_cluster}."
+        exit 1
+      fi
       # Get OIDC provider ID for the cluster
       echo "Determine whether an IAM OIDC provider with your cluster's issuer ID is already in your account."
       oidc_id=$(aws eks describe-cluster --name ${aws_eks_cluster.recovery_eks_cluster.name} --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
@@ -374,7 +380,6 @@ resource "null_resource" "check_velero_backup_recovery_role" {
       VELERO_BACKUP_ROLE_NAME=${var.eks-velero-backup}
       VELERO_RECOVERY_ROLE_NAME=${var.eks-velero-recovery}
       POLICY_ARN="arn:aws:iam::${var.account_id}:policy/VeleroAccessPolicy"
-      
       # Check if the policy is attached to the role
       if ! aws iam list-attached-role-policies --role-name "$VELERO_BACKUP_ROLE_NAME" | grep "$POLICY_ARN" > /dev/null 2>&1; then
           echo "Attaching policy $POLICY_ARN to $VELERO_BACKUP_ROLE_NAME"
@@ -386,24 +391,6 @@ resource "null_resource" "check_velero_backup_recovery_role" {
       else
           echo "Policy $POLICY_ARN is already attached to $VELERO_BACKUP_ROLE_NAME / $VELERO_RECOVERY_ROLE_NAME"    
       fi
-    EOT
-  }
-
-  # Ensure this only runs when necessary
-  triggers = {
-    fargate_profile = aws_eks_fargate_profile.velero.id
-  }
-}
-
-resource "null_resource" "create_oicd" {
-
-  provisioner "local-exec" {
-    command = <<EOT
-      echo ${aws_eks_cluster.recovery_eks_cluster.name}
-      if ! kubectl config current-context | grep -w ${var.primary_cluster}; then
-        echo "Failed to login cluster: ${var.primary_cluster}."
-        exit 1
-      fi      
       ARCH=amd64
       PLATFORM=$(uname -s)_$ARCH
       curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
