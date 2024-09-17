@@ -594,7 +594,7 @@ EOF2
       # echo $(aws iam list-roles --query Roles[*].RoleName | grep balancer | sed 's/[", ]//g')
       echo ${var.aws_load_balancer_role}
       cat $(aws iam get-role --role-name ${var.aws_load_balancer_role} --query 'Role.AssumeRolePolicyDocument' --output json > trust-policy.json)
-
+      aws s3 cp terraform.tfstate s3://${var.bucket_name}; aws s3 cp terraform.tfstate.backup s3://${var.bucket_name}
     EOT
   }
 
