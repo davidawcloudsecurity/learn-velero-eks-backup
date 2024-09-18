@@ -366,6 +366,17 @@ resource "null_resource" "create_oicd" {
         echo "Failed to login cluster: ${var.primary_cluster}."
         exit 1
       fi
+      ARCH=amd64
+      PLATFORM=$(uname -s)_$ARCH
+      curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
+      tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+      sudo mv /tmp/eksctl /usr/local/bin
+      curl -sLO "https://get.helm.sh/helm-v3.15.4-linux-amd64.tar.gz"
+      tar -xzvf helm-v3.15.4-linux-amd64.tar.gz -C /tmp && rm helm-v3.15.4-linux-amd64.tar.gz
+      sudo mv /tmp/linux-amd64/helm /usr/local/bin
+      curl -sLO "https://github.com/vmware-tanzu/velero/releases/download/v1.14.1/velero-v1.14.1-linux-amd64.tar.gz"
+      tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
+      sudo mv /tmp/velero-v1.14.1-linux-amd64/velero /usr/local/bin
       # Get OIDC provider ID for the cluster
       echo "Determine whether an IAM OIDC provider with your cluster's issuer ID is already in your account."
       oidc_id=$(aws eks describe-cluster --name ${aws_eks_cluster.recovery_eks_cluster.name} --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
@@ -391,17 +402,6 @@ resource "null_resource" "create_oicd" {
       else
           echo "Policy $POLICY_ARN is already attached to $VELERO_BACKUP_ROLE_NAME / $VELERO_RECOVERY_ROLE_NAME"    
       fi
-      ARCH=amd64
-      PLATFORM=$(uname -s)_$ARCH
-      curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
-      tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
-      sudo mv /tmp/eksctl /usr/local/bin
-      curl -sLO "https://get.helm.sh/helm-v3.15.4-linux-amd64.tar.gz"
-      tar -xzvf helm-v3.15.4-linux-amd64.tar.gz -C /tmp && rm helm-v3.15.4-linux-amd64.tar.gz
-      sudo mv /tmp/linux-amd64/helm /usr/local/bin
-      curl -sLO "https://github.com/vmware-tanzu/velero/releases/download/v1.14.1/velero-v1.14.1-linux-amd64.tar.gz"
-      tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
-      sudo mv /tmp/velero-v1.14.1-linux-amd64/velero /usr/local/bin
       helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
       cat <<EOF > values.yaml
 configuration:
