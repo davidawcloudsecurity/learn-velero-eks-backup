@@ -478,7 +478,7 @@ EOF2
           --subnets ${var.subnet_1} ${var.subnet_2} \
           --selectors namespace=velero
           while true; do
-            if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames --output text | grep velero; then
+            if ! aws eks list-fargate-profiles --cluster-name ${var.primary_cluster} --query fargateProfileNames | grep velero; then
               echo "Still waiting for fargate velero... "
               sleep 10
             else
