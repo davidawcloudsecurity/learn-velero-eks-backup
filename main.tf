@@ -595,7 +595,7 @@ EOF2
           sleep 10
         fi
       done
-      echo append oidc to aws-load-balancer
+      echo "append oidc to aws-load-balancer"
       # echo $(aws iam list-roles --query Roles[*].RoleName | grep balancer | sed 's/[", ]//g')
       aws s3 cp terraform.tfstate s3://${var.bucket_name}; aws s3 cp terraform.tfstate.backup s3://${var.bucket_name}
       OIDC_PROVIDER=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --region ${var.region} --query "cluster.identity.oidc.issuer" --output text | sed 's/https:\/\///')
