@@ -6,6 +6,11 @@ variable "region" {
   default = "ap-southeast-1"
 }
 
+variable "set_clone" {
+  type = boolean
+  default = true
+}
+
 variable "eks_role" {
   type = string
 }
@@ -535,6 +540,11 @@ EOF2
           COUNTER=$((COUNTER+1))
         fi
       done
+      # Skip if set_clone is true
+      if [ "${var.set_clone}" != true ]; then
+        echo "set_clone is not true. No need to clone."
+        exit 1
+      fi
       aws eks update-kubeconfig --region ${var.region} --name ${var.recovery_eks_cluster}
       kubectl rollout restart deploy/coredns -n kube-system
       echo "Helm install velero in recovery cluster"
