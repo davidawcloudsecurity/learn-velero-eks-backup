@@ -657,6 +657,7 @@ EOF2
 
   # Ensure this only runs when necessary
   triggers = {
-    fargate_profile = aws_eks_fargate_profile.velero.id
+    fargate_profile = aws_eks_fargate_profile.velero.id,
+    set_clone       = var.set_clone
   }
 }
