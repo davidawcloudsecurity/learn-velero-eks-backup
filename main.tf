@@ -7,7 +7,7 @@ variable "region" {
 }
 
 variable "set_clone" {
-  type = boolean
+  type = bool
   default = true
 }
 
