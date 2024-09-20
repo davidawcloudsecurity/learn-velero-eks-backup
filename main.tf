@@ -508,13 +508,14 @@ EOF2
         done
       fi
       echo "Check if ${var.primary_cluster}-backup exist"
-      if velero backup get ${var.primary_cluster}-backup; then
-        velero backup delete ${var.primary_cluster}-backup --confirm
-        kubectl -n velero delete backup ${var.primary_cluster}-backup
-        echo "Sleep 30s"
-        sleep 30
-        echo "Create the backup"      
-        velero backup create ${var.primary_cluster}-backup
+      if velero backup get "${var.primary_cluster}-backup" && [ "${var.set_clone}" != true ]; then
+        # velero backup delete ${var.primary_cluster}-backup --confirm
+        # kubectl -n velero delete backup ${var.primary_cluster}-backup
+        # echo "Sleep 30s"
+        # sleep 30
+        echo "Backup exist, no need to clone. Exiting..."
+        exit 1
+        # velero backup create ${var.primary_cluster}-backup
       else
         echo ""
         echo "Create the backup"      
