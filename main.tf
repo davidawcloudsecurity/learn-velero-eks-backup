@@ -540,6 +540,7 @@ EOF2
             sleep 10
           fi
         done
+        echo "Exiting after restoring as set_clone is not true"
         exit 1
         # velero backup create ${var.primary_cluster}-backup
       else
