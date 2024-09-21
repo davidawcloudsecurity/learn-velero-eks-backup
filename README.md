@@ -301,6 +301,8 @@ kubectl get ns velero -o json | jq '.spec.finalizers = []' | kubectl replace --r
 ```
 Resource - https://bluexp.netapp.com/blog/cbs-aws-blg-eks-back-up-how-to-back-up-and-restore-eks-with-velero
 
+How to map users/roles to new/existing clusters thru configmap - https://medium.com/@radha.sable25/enabling-iam-users-roles-access-on-amazon-eks-cluster-f69b485c674f
+
 https://aws.amazon.com/blogs/containers/backup-and-restore-your-amazon-eks-cluster-resources-using-velero/
 
 https://docs.vmware.com/en/VMware-Tanzu-Mission-Control/services/tanzumc-using/GUID-A0618B8D-8A28-4A5F-AC8C-5FF840277ADF.html
