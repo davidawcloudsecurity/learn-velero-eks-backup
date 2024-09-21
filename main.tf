@@ -159,11 +159,10 @@ data "aws_subnet" "subnet_2" {
 variable "eks_sg" {
 }
 
-/* remove to test
 data "aws_security_group" "eks_sg" {
   id = var.eks_sg
 }
-*/
+
 variable "recovery_eks_cluster" {
 }
 # EKS Cluster
