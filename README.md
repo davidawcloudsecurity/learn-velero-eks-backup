@@ -268,7 +268,7 @@ fargate_role=$(aws iam list-roles --query "Roles[*].RoleName" --region $REGION |
 vpcid=$(echo "$cluster_info" | jq -r '.vpcId');
 subnet_1=$(echo "$cluster_info" | jq -r '.subnetIds[0]');
 subnet_2=$(echo "$cluster_info" | jq -r '.subnetIds[1]');
-eks_sg=$(echo "$cluster_info" | jq -r '.securityGroupIds[0]');
+eks_sg=$(echo "$cluster_info" | jq -r '.clusterSecurityGroupId');
 aws_lb_role=$(aws iam list-roles --query Roles[*].RoleName | grep aws-load-balancer-controller | sed 's/[", ]//g')
 echo REGION: $REGION; \
 echo Primary Cluster: $primary_cluster; \
