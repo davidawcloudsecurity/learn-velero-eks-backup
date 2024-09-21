@@ -23,6 +23,11 @@ data "aws_iam_role" "aws_load_balancer_role" {
   name = var.aws_load_balancer_role
 }
 
+variable "existing_eks_security_group_id" {
+  description = "ID of the existing security group eks"
+  type        = string
+}
+
 variable "cluster_version" {
   default = 1.24
 }
@@ -155,13 +160,14 @@ data "aws_subnet" "subnet_2" {
   id = var.subnet_2
 }
 
+/* remove to test
 variable "eks_sg" {
 }
 
 data "aws_security_group" "eks_sg" {
   id = var.eks_sg
 }
-
+*/
 variable "recovery_eks_cluster" {
 }
 # EKS Cluster
@@ -172,7 +178,8 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
 
   vpc_config {
     subnet_ids         = [data.aws_subnet.subnet_1.id, data.aws_subnet.subnet_2.id]
-    security_group_ids = [data.aws_security_group.eks_sg.id]
+    security_group_ids = [var.existing_eks_security_group_id]  # Attach existing security group
+    # security_group_ids = [data.aws_security_group.eks_sg.id]
   }
 
   depends_on = [
