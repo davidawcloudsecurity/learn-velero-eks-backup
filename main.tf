@@ -593,11 +593,11 @@ EOF2
         kubectl logs deploy/velero -n velero --tail=10
         sleep 10
       done
-      echo "Create the restore"
       while true; do
           # Check if the specific backup exists
           if velero backup get | grep -q "${var.primary_cluster}-backup"; then
               # Create a restore from the backup if the backup exists
+              echo "Create the restore"
               velero restore create "${var.primary_cluster}-restore" \
               --from-backup "${var.primary_cluster}-backup"
               break
