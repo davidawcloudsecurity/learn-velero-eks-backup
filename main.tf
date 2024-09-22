@@ -163,12 +163,12 @@ data "aws_security_group" "eks_sg" {
   id = var.eks_sg
 }
 
-data "aws_security_group_rule" "ingress_rules" {
+resource "aws_security_group_rule" "ingress_rules" {
   security_group_id = data.aws_security_group.eks_sg.id
   type              = "ingress"
 }
 
-data "aws_security_group_rule" "egress_rules" {
+resource "aws_security_group_rule" "egress_rules" {
   security_group_id = data.aws_security_group.eks_sg.id
   type              = "egress"
 }
@@ -179,7 +179,7 @@ resource "aws_security_group" "new_sg" {
   vpc_id      = data.aws_security_group.eks_sg.vpc_id
 
   dynamic "ingress" {
-    for_each = data.aws_security_group_rule.ingress_rules
+    for_each = aws_security_group_rule.ingress_rules
     content {
       from_port   = ingress.value.from_port
       to_port     = ingress.value.to_port
@@ -190,7 +190,7 @@ resource "aws_security_group" "new_sg" {
   }
 
   dynamic "egress" {
-    for_each = data.aws_security_group_rule.egress_rules
+    for_each = aws_security_group_rule.egress_rules
     content {
       from_port   = egress.value.from_port
       to_port     = egress.value.to_port
