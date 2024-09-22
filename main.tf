@@ -136,10 +136,15 @@ variable "vpcid" {
   type = string
 }
 
+# Data source to fetch information about the VPC associated with the existing security group
+data "aws_vpc" "vpc" {
+  id = data.aws_security_group.eks_sg.vpc_id
+}
+/* remove first for above
 data "aws_vpc" "vpc" {
   id = var.vpcid
 }
-
+*/
 variable "subnet_1" {
 
 }
@@ -164,11 +169,6 @@ variable "eks_sg_id" {
 # Data source to fetch information about the existing security group
 data "aws_security_group" "eks_sg" {
   id = var.eks_sg_id
-}
-
-# Data source to fetch information about the VPC associated with the existing security group
-data "aws_vpc" "vpc" {
-  id = data.aws_security_group.eks_sg.vpc_id
 }
 
 # Resource to create the new (cloned) security group
