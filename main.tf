@@ -594,7 +594,8 @@ EOF2
           if velero backup get | grep -q "${var.primary_cluster}-backup"; then
               # Create a restore from the backup if the backup exists
               velero restore create "${var.primary_cluster}-restore" \
-              --from-backup "${var.primary_cluster}-backup"
+              --from-backup "${var.primary_cluster}-backup" \
+              --existing-resource-policy=update
               break
           fi
           echo "Waiting for backup sync"
