@@ -167,40 +167,67 @@ data "aws_security_group" "existing_sg" {
   id = "sg-0b4fa5217bf3cc346"
 }
 
-# Data source to get all the rules of the existing security group
-data "aws_security_group_rule" "existing_rules" {
-  count = length(data.aws_security_group.existing_sg.ingress) + length(data.aws_security_group.existing_sg.egress)
-
-  security_group_id = data.aws_security_group.existing_sg.id
-  type              = count.index < length(data.aws_security_group.existing_sg.ingress) ? "ingress" : "egress"
-}
-
 # Resource for the new security group
 resource "aws_security_group" "new_sg" {
   name        = "cloned-security-group"
   description = "A cloned security group from an existing one"
-  vpc_id      = data.aws_vpc.vpc
+  vpc_id      = data.aws_vpc.vpc.id
 
   tags = {
     Name = "Cloned Security Group"
   }
 }
 
-# Resource to create rules for the new security group
-resource "aws_security_group_rule" "cloned_rules" {
-  count = length(data.aws_security_group_rule.existing_rules)
+# Resource to create ingress rules for the new security group
+resource "aws_security_group_rule" "ingress_rules" {
+  count = length(data.aws_security_group.existing_sg.ingress)
 
   security_group_id = aws_security_group.new_sg.id
-  type                     = data.aws_security_group_rule.existing_rules[count.index].type
-  from_port                = data.aws_security_group_rule.existing_rules[count.index].from_port
-  to_port                  = data.aws_security_group_rule.existing_rules[count.index].to_port
-  protocol                 = data.aws_security_group_rule.existing_rules[count.index].protocol
-  cidr_blocks              = data.aws_security_group_rule.existing_rules[count.index].cidr_blocks
-  ipv6_cidr_blocks         = data.aws_security_group_rule.existing_rules[count.index].ipv6_cidr_blocks
-  prefix_list_ids          = data.aws_security_group_rule.existing_rules[count.index].prefix_list_ids
-  source_security_group_id = data.aws_security_group_rule.existing_rules[count.index].source_security_group_id
-  self                     = data.aws_security_group_rule.existing_rules[count.index].self
-  description              = data.aws_security_group_rule.existing_rules[count.index].description
+  type              = "ingress"
+  from_port         = data.aws_security_group.existing_sg.ingress[count.index].from_port
+  to_port           = data.aws_security_group.existing_sg.ingress[count.index].to_port
+  protocol          = data.aws_security_group.existing_sg.ingress[count.index].protocol
+  cidr_blocks       = data.aws_security_group.existing_sg.ingress[count.index].cidr_blocks
+  ipv6_cidr_blocks  = data.aws_security_group.existing_sg.ingress[count.index].ipv6_cidr_blocks
+  prefix_list_ids   = data.aws_security_group.existing_sg.ingress[count.index].prefix_list_ids
+  description       = data.aws_security_group.existing_sg.ingress[count.index].description
+
+  # Handle self-referencing rules
+  self = data.aws_security_group.existing_sg.ingress[count.index].self
+
+  # Handle security group references
+  dynamic "source_security_group_id" {
+    for_each = data.aws_security_group.existing_sg.ingress[count.index].security_groups
+    content {
+      source_security_group_id = source_security_group_id.value
+    }
+  }
+}
+
+# Resource to create egress rules for the new security group
+resource "aws_security_group_rule" "egress_rules" {
+  count = length(data.aws_security_group.existing_sg.egress)
+
+  security_group_id = aws_security_group.new_sg.id
+  type              = "egress"
+  from_port         = data.aws_security_group.existing_sg.egress[count.index].from_port
+  to_port           = data.aws_security_group.existing_sg.egress[count.index].to_port
+  protocol          = data.aws_security_group.existing_sg.egress[count.index].protocol
+  cidr_blocks       = data.aws_security_group.existing_sg.egress[count.index].cidr_blocks
+  ipv6_cidr_blocks  = data.aws_security_group.existing_sg.egress[count.index].ipv6_cidr_blocks
+  prefix_list_ids   = data.aws_security_group.existing_sg.egress[count.index].prefix_list_ids
+  description       = data.aws_security_group.existing_sg.egress[count.index].description
+
+  # Handle self-referencing rules
+  self = data.aws_security_group.existing_sg.egress[count.index].self
+
+  # Handle security group references
+  dynamic "source_security_group_id" {
+    for_each = data.aws_security_group.existing_sg.egress[count.index].security_groups
+    content {
+      source_security_group_id = source_security_group_id.value
+    }
+  }
 }
 
 variable "recovery_eks_cluster" {
