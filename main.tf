@@ -171,49 +171,70 @@ data "aws_security_group" "eks_sg" {
   id = var.eks_sg_id
 }
 
+# Data source to fetch ingress rules
+data "aws_security_group_rules" "ingress" {
+  security_group_id = var.eks_sg_id
+  filter {
+    name   = "type"
+    values = ["ingress"]
+  }
+}
+
+# Data source to fetch egress rules
+data "aws_security_group_rules" "egress" {
+  security_group_id = var.eks_sg_id
+  filter {
+    name   = "type"
+    values = ["egress"]
+  }
+}
+
 # Resource to create the new (cloned) security group
 resource "aws_security_group" "new_sg" {
   name        = "cloned-security-group"
   description = "A cloned security group from existing one"
-  vpc_id      = data.aws_vpc.vpc.id
-
-  # Clone inbound rules
-  dynamic "ingress" {
-    for_each = data.aws_security_group.eks_sg.ingress
-    content {
-      from_port        = ingress.value.from_port
-      to_port          = ingress.value.to_port
-      protocol         = ingress.value.protocol
-      cidr_blocks      = ingress.value.cidr_blocks
-      ipv6_cidr_blocks = ingress.value.ipv6_cidr_blocks
-      prefix_list_ids  = ingress.value.prefix_list_ids
-      security_groups  = ingress.value.security_groups
-      self             = ingress.value.self
-      description      = ingress.value.description
-    }
-  }
-
-  # Clone outbound rules
-  dynamic "egress" {
-    for_each = data.aws_security_group.eks_sg.egress
-    content {
-      from_port        = egress.value.from_port
-      to_port          = egress.value.to_port
-      protocol         = egress.value.protocol
-      cidr_blocks      = egress.value.cidr_blocks
-      ipv6_cidr_blocks = egress.value.ipv6_cidr_blocks
-      prefix_list_ids  = egress.value.prefix_list_ids
-      security_groups  = egress.value.security_groups
-      self             = egress.value.self
-      description      = egress.value.description
-    }
-  }
+  vpc_id      = data.aws_security_group.eks_sg.vpc_id
 
   tags = {
     Name = "Cloned-SG-${data.aws_security_group.eks_sg.name}"
   }
 }
 
+# Create ingress rules
+resource "aws_security_group_rule" "ingress_rules" {
+  count = length(data.aws_security_group_rules.ingress.rules)
+
+  security_group_id = aws_security_group.new_sg.id
+  type              = "ingress"
+
+  from_port                = data.aws_security_group_rules.ingress.rules[count.index].from_port
+  to_port                  = data.aws_security_group_rules.ingress.rules[count.index].to_port
+  protocol                 = data.aws_security_group_rules.ingress.rules[count.index].protocol
+  cidr_blocks              = data.aws_security_group_rules.ingress.rules[count.index].cidr_blocks
+  ipv6_cidr_blocks         = data.aws_security_group_rules.ingress.rules[count.index].ipv6_cidr_blocks
+  prefix_list_ids          = data.aws_security_group_rules.ingress.rules[count.index].prefix_list_ids
+  source_security_group_id = data.aws_security_group_rules.ingress.rules[count.index].source_security_group_id
+  self                     = data.aws_security_group_rules.ingress.rules[count.index].self
+  description              = data.aws_security_group_rules.ingress.rules[count.index].description
+}
+
+# Create egress rules
+resource "aws_security_group_rule" "egress_rules" {
+  count = length(data.aws_security_group_rules.egress.rules)
+
+  security_group_id = aws_security_group.new_sg.id
+  type              = "egress"
+
+  from_port                = data.aws_security_group_rules.egress.rules[count.index].from_port
+  to_port                  = data.aws_security_group_rules.egress.rules[count.index].to_port
+  protocol                 = data.aws_security_group_rules.egress.rules[count.index].protocol
+  cidr_blocks              = data.aws_security_group_rules.egress.rules[count.index].cidr_blocks
+  ipv6_cidr_blocks         = data.aws_security_group_rules.egress.rules[count.index].ipv6_cidr_blocks
+  prefix_list_ids          = data.aws_security_group_rules.egress.rules[count.index].prefix_list_ids
+  source_security_group_id = data.aws_security_group_rules.egress.rules[count.index].source_security_group_id
+  self                     = data.aws_security_group_rules.egress.rules[count.index].self
+  description              = data.aws_security_group_rules.egress.rules[count.index].description
+}
 
 variable "recovery_eks_cluster" {
 }
