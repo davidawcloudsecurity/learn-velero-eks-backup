@@ -208,8 +208,8 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
 
   vpc_config {
     subnet_ids         = [data.aws_subnet.subnet_1.id, data.aws_subnet.subnet_2.id]
-    # security_group_ids = [var.eks_sg]  # Attach existing security group
-    security_group_ids = [data.aws_security_group.eks_sg.id]
+    security_group_ids = [aws_security_group.new_sg.id]  # Attach existing security group
+    # security_group_ids = [data.aws_security_group.eks_sg.id]
   }
 
   depends_on = [
@@ -217,7 +217,7 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
     data.aws_vpc.vpc,
     data.aws_subnet.subnet_1,
     data.aws_subnet.subnet_2,
-    data.aws_security_group.eks_sg
+    aws_security_group.new_sg
   ]
 }
 
