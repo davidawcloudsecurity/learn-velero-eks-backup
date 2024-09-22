@@ -170,7 +170,7 @@ resource "aws_security_group" "new_sg" {
 
   # Clone inbound rules
   dynamic "ingress" {
-    for_each = data.aws_security_group.eks_sg.ingress[*]
+    for_each = data.aws_security_group.eks_sg.id.ingress
 
     content {
       from_port   = ingress.value.from_port
