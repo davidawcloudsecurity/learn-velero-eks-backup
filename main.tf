@@ -163,6 +163,44 @@ data "aws_security_group" "eks_sg" {
   id = var.eks_sg
 }
 
+data "aws_security_group" "existing_sg" {
+  id = "sg-0b4fa5217bf3cc346"  # Replace with your existing Security Group ID
+}
+
+resource "aws_security_group" "new_sg" {
+  name        = "cloned-security-group"
+  description = "A cloned security group from existing one"
+  vpc_id      = "data.aws_vpc.vpc"  # Replace with your VPC ID
+
+  # Clone inbound rules
+  dynamic "ingress" {
+    for_each = data.aws_security_group.existing_sg.ingress
+
+    content {
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks  = ingress.value.cidr_blocks
+      security_groups = ingress.value.security_groups
+      self        = ingress.value.self
+    }
+  }
+
+  # Clone outbound rules  
+  dynamic "egress" {
+    for_each = data.aws_security_group.existing_sg.egress
+
+    content {
+      from_port   = egress.value.from_port
+      to_port     = egress.value.to_port
+      protocol    = egress.value.protocol
+      cidr_blocks  = egress.value.cidr_blocks
+      security_groups = egress.value.security_groups
+      self        = egress.value.self
+    }
+  }
+}
+
 variable "recovery_eks_cluster" {
 }
 # EKS Cluster
