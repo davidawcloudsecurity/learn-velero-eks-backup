@@ -298,6 +298,7 @@ tfa -var account_id=$account_id -var region=$region -var bucket_name=$bucket_nam
 ```bash
 kubectl get events --sort-by='.lastTimestamp'
 kubectl get ns velero -o json | jq '.spec.finalizers = []' | kubectl replace --raw "/api/v1/namespaces/velero/finalize" -f -
+kubectl scale --replicas=3 deploy xyz -n namespace
 ```
 Resource - https://bluexp.netapp.com/blog/cbs-aws-blg-eks-back-up-how-to-back-up-and-restore-eks-with-velero
 
