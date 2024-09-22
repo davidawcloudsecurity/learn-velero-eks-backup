@@ -136,15 +136,10 @@ variable "vpcid" {
   type = string
 }
 
-# Data source to fetch information about the VPC associated with the existing security group
-data "aws_vpc" "vpc" {
-  id = data.aws_security_group.eks_sg.vpc_id
-}
-/* remove first for above
 data "aws_vpc" "vpc" {
   id = var.vpcid
 }
-*/
+
 variable "subnet_1" {
 
 }
@@ -160,80 +155,12 @@ data "aws_subnet" "subnet_2" {
   id = var.subnet_2
 }
 
-# Input variable for the existing security group ID
+
 variable "eks_sg" {
-  description = "ID of the existing EKS security group to clone"
-  type        = string
 }
 
-# Data source to fetch information about the existing security group
 data "aws_security_group" "eks_sg" {
-  id = var.eks_sg_id
-}
-
-# Data source to fetch ingress rules
-data "aws_security_group_rules" "ingress" {
-  security_group_id = var.eks_sg_id
-  filter {
-    name   = "type"
-    values = ["ingress"]
-  }
-}
-
-# Data source to fetch egress rules
-data "aws_security_group_rules" "egress" {
-  security_group_id = var.eks_sg_id
-  filter {
-    name   = "type"
-    values = ["egress"]
-  }
-}
-
-# Resource to create the new (cloned) security group
-resource "aws_security_group" "new_sg" {
-  name        = "cloned-security-group"
-  description = "A cloned security group from existing one"
-  vpc_id      = data.aws_security_group.eks_sg.vpc_id
-
-  tags = {
-    Name = "Cloned-SG-${data.aws_security_group.eks_sg.name}"
-  }
-}
-
-# Create ingress rules
-resource "aws_security_group_rule" "ingress_rules" {
-  count = length(data.aws_security_group_rules.ingress.rules)
-
-  security_group_id = aws_security_group.new_sg.id
-  type              = "ingress"
-
-  from_port                = data.aws_security_group_rules.ingress.rules[count.index].from_port
-  to_port                  = data.aws_security_group_rules.ingress.rules[count.index].to_port
-  protocol                 = data.aws_security_group_rules.ingress.rules[count.index].protocol
-  cidr_blocks              = data.aws_security_group_rules.ingress.rules[count.index].cidr_blocks
-  ipv6_cidr_blocks         = data.aws_security_group_rules.ingress.rules[count.index].ipv6_cidr_blocks
-  prefix_list_ids          = data.aws_security_group_rules.ingress.rules[count.index].prefix_list_ids
-  source_security_group_id = data.aws_security_group_rules.ingress.rules[count.index].source_security_group_id
-  self                     = data.aws_security_group_rules.ingress.rules[count.index].self
-  description              = data.aws_security_group_rules.ingress.rules[count.index].description
-}
-
-# Create egress rules
-resource "aws_security_group_rule" "egress_rules" {
-  count = length(data.aws_security_group_rules.egress.rules)
-
-  security_group_id = aws_security_group.new_sg.id
-  type              = "egress"
-
-  from_port                = data.aws_security_group_rules.egress.rules[count.index].from_port
-  to_port                  = data.aws_security_group_rules.egress.rules[count.index].to_port
-  protocol                 = data.aws_security_group_rules.egress.rules[count.index].protocol
-  cidr_blocks              = data.aws_security_group_rules.egress.rules[count.index].cidr_blocks
-  ipv6_cidr_blocks         = data.aws_security_group_rules.egress.rules[count.index].ipv6_cidr_blocks
-  prefix_list_ids          = data.aws_security_group_rules.egress.rules[count.index].prefix_list_ids
-  source_security_group_id = data.aws_security_group_rules.egress.rules[count.index].source_security_group_id
-  self                     = data.aws_security_group_rules.egress.rules[count.index].self
-  description              = data.aws_security_group_rules.egress.rules[count.index].description
+  id = var.eks_sg
 }
 
 variable "recovery_eks_cluster" {
@@ -246,8 +173,8 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
 
   vpc_config {
     subnet_ids         = [data.aws_subnet.subnet_1.id, data.aws_subnet.subnet_2.id]
-    security_group_ids = [aws_security_group.new_sg.id]  # Attach existing security group
-    # security_group_ids = [data.aws_security_group.eks_sg.id]
+    # security_group_ids = [var.eks_sg]  # Attach existing security group
+    security_group_ids = [data.aws_security_group.eks_sg.id]
   }
 
   depends_on = [
@@ -255,7 +182,7 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
     data.aws_vpc.vpc,
     data.aws_subnet.subnet_1,
     data.aws_subnet.subnet_2,
-    aws_security_group.new_sg
+    data.aws_security_group.eks_sg
   ]
 }
 
