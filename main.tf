@@ -290,9 +290,12 @@ output "velero-backup_arn" {
   value = aws_iam_role.velero-backup.arn
 }
 
-
 output "primary_cluster" {
   value = var.primary_cluster
+}
+
+output "recovery_cluster" {
+  value = var.recovery_eks_cluster
 }
 
 data "aws_eks_cluster" "primary" {
