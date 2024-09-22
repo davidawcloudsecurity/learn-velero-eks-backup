@@ -171,7 +171,7 @@ data "aws_security_group" "existing_sg" {
 resource "aws_security_group" "new_sg" {
   name        = "cloned-security-group"
   description = "A cloned security group from an existing one"
-  vpc_id      = var.vpc_id  # Use a variable for the VPC ID
+  vpc_id      = data.aws_vpc.vpc  # Use a variable for the VPC ID
 
   # Clone inbound rules
   dynamic "ingress" {
