@@ -155,7 +155,6 @@ data "aws_subnet" "subnet_2" {
   id = var.subnet_2
 }
 
-
 variable "eks_sg" {
 }
 
@@ -163,41 +162,51 @@ data "aws_security_group" "eks_sg" {
   id = var.eks_sg
 }
 
-data "aws_security_group_rule" "ingress_rules" {
-  security_group_id = data.aws_security_group.eks_sg.id
-  type              = "ingress"
+# Data source for the existing security group
+data "aws_security_group" "existing_sg" {
+  id = "sg-0b4fa5217bf3cc346"  # Use a variable for the existing security group ID
 }
 
-data "aws_security_group_rule" "egress_rules" {
-  security_group_id = data.aws_security_group.eks_sg.id
-  type              = "egress"
-}
-
+# Resource for the new security group
 resource "aws_security_group" "new_sg" {
   name        = "cloned-security-group"
-  description = "Cloned security group from existing one"
-  vpc_id      = data.aws_security_group.eks_sg.vpc_id
+  description = "A cloned security group from an existing one"
+  vpc_id      = var.vpc_id  # Use a variable for the VPC ID
 
+  # Clone inbound rules
   dynamic "ingress" {
-    for_each = data.aws_security_group_rule.ingress_rules
+    for_each = data.aws_security_group.existing_sg.ingress
     content {
-      from_port   = ingress.value.from_port
-      to_port     = ingress.value.to_port
-      protocol    = ingress.value.protocol
-      cidr_blocks = ingress.value.cidr_blocks
-      security_groups = ingress.value.security_groups
+      from_port        = ingress.value.from_port
+      to_port          = ingress.value.to_port
+      protocol         = ingress.value.protocol
+      cidr_blocks      = ingress.value.cidr_blocks
+      ipv6_cidr_blocks = ingress.value.ipv6_cidr_blocks
+      prefix_list_ids  = ingress.value.prefix_list_ids
+      security_groups  = ingress.value.security_groups
+      self             = ingress.value.self
+      description      = ingress.value.description
     }
   }
 
+  # Clone outbound rules
   dynamic "egress" {
-    for_each = data.aws_security_group_rule.egress_rules
+    for_each = data.aws_security_group.existing_sg.egress
     content {
-      from_port   = egress.value.from_port
-      to_port     = egress.value.to_port
-      protocol    = egress.value.protocol
-      cidr_blocks = egress.value.cidr_blocks
-      security_groups = egress.value.security_groups
+      from_port        = egress.value.from_port
+      to_port          = egress.value.to_port
+      protocol         = egress.value.protocol
+      cidr_blocks      = egress.value.cidr_blocks
+      ipv6_cidr_blocks = egress.value.ipv6_cidr_blocks
+      prefix_list_ids  = egress.value.prefix_list_ids
+      security_groups  = egress.value.security_groups
+      self             = egress.value.self
+      description      = egress.value.description
     }
+  }
+
+  tags = {
+    Name = "Cloned Security Group"
   }
 }
 
