@@ -338,6 +338,7 @@ resource "aws_iam_role" "velero-backup" {
   managed_policy_arns = [
     aws_iam_policy.velero_policy.arn
   ]
+  depends_on = [aws_eks_cluster.recovery_eks_cluster]
 }
 
 resource "aws_iam_role" "velero-recovery" {
@@ -365,6 +366,7 @@ resource "aws_iam_role" "velero-recovery" {
   managed_policy_arns = [
     aws_iam_policy.velero_policy.arn
   ]
+  depends_on = [aws_eks_cluster.recovery_eks_cluster]
 }
 
 resource "null_resource" "create_oicd" {
