@@ -155,6 +155,7 @@ data "aws_subnet" "subnet_2" {
   id = var.subnet_2
 }
 
+
 variable "eks_sg" {
 }
 
@@ -162,73 +163,40 @@ data "aws_security_group" "eks_sg" {
   id = var.eks_sg
 }
 
-# Data source for the existing security group
-data "aws_security_group" "existing_sg" {
-  id = "sg-0b4fa5217bf3cc346"
-}
-
-# Resource for the new security group
 resource "aws_security_group" "new_sg" {
   name        = "cloned-security-group"
-  description = "A cloned security group from an existing one"
-  vpc_id      = data.aws_vpc.vpc.id
+  description = "A cloned security group from existing one"
+  vpc_id      = data.aws_vpc.vpc.id  # Replace with your VPC ID
 
-  tags = {
-    Name = "Cloned Security Group"
-  }
-}
+  # Clone inbound rules
+  dynamic "ingress" {
+    for_each = data.aws_security_group.eks_sg.ingress
 
-# Resource to create ingress rules for the new security group
-resource "aws_security_group_rule" "ingress_rules" {
-  count = length(data.aws_security_group.existing_sg.ingress)
-
-  security_group_id = aws_security_group.new_sg.id
-  type              = "ingress"
-  from_port         = data.aws_security_group.existing_sg.ingress[count.index].from_port
-  to_port           = data.aws_security_group.existing_sg.ingress[count.index].to_port
-  protocol          = data.aws_security_group.existing_sg.ingress[count.index].protocol
-  cidr_blocks       = data.aws_security_group.existing_sg.ingress[count.index].cidr_blocks
-  ipv6_cidr_blocks  = data.aws_security_group.existing_sg.ingress[count.index].ipv6_cidr_blocks
-  prefix_list_ids   = data.aws_security_group.existing_sg.ingress[count.index].prefix_list_ids
-  description       = data.aws_security_group.existing_sg.ingress[count.index].description
-
-  # Handle self-referencing rules
-  self = data.aws_security_group.existing_sg.ingress[count.index].self
-
-  # Handle security group references
-  dynamic "source_security_group_id" {
-    for_each = data.aws_security_group.existing_sg.ingress[count.index].security_groups
     content {
-      source_security_group_id = source_security_group_id.value
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks  = ingress.value.cidr_blocks
+      security_groups = ingress.value.security_groups
+      self        = ingress.value.self
+    }
+  }
+
+  # Clone outbound rules
+  dynamic "egress" {
+    for_each = data.aws_security_group.eks_sg.egress
+
+    content {
+      from_port   = egress.value.from_port
+      to_port     = egress.value.to_port
+      protocol    = egress.value.protocol
+      cidr_blocks  = egress.value.cidr_blocks
+      security_groups = egress.value.security_groups
+      self        = egress.value.self
     }
   }
 }
 
-# Resource to create egress rules for the new security group
-resource "aws_security_group_rule" "egress_rules" {
-  count = length(data.aws_security_group.existing_sg.egress)
-
-  security_group_id = aws_security_group.new_sg.id
-  type              = "egress"
-  from_port         = data.aws_security_group.existing_sg.egress[count.index].from_port
-  to_port           = data.aws_security_group.existing_sg.egress[count.index].to_port
-  protocol          = data.aws_security_group.existing_sg.egress[count.index].protocol
-  cidr_blocks       = data.aws_security_group.existing_sg.egress[count.index].cidr_blocks
-  ipv6_cidr_blocks  = data.aws_security_group.existing_sg.egress[count.index].ipv6_cidr_blocks
-  prefix_list_ids   = data.aws_security_group.existing_sg.egress[count.index].prefix_list_ids
-  description       = data.aws_security_group.existing_sg.egress[count.index].description
-
-  # Handle self-referencing rules
-  self = data.aws_security_group.existing_sg.egress[count.index].self
-
-  # Handle security group references
-  dynamic "source_security_group_id" {
-    for_each = data.aws_security_group.existing_sg.egress[count.index].security_groups
-    content {
-      source_security_group_id = source_security_group_id.value
-    }
-  }
-}
 
 variable "recovery_eks_cluster" {
 }
