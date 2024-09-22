@@ -161,7 +161,7 @@ data "aws_subnet" "subnet_2" {
 }
 
 # Input variable for the existing security group ID
-variable "eks_sg_id" {
+variable "eks_sg" {
   description = "ID of the existing EKS security group to clone"
   type        = string
 }
