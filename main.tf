@@ -163,6 +163,41 @@ data "aws_security_group" "eks_sg" {
   id = var.eks_sg
 }
 
+resource "aws_security_group" "new_sg" {
+  name        = "cloned-security-group"
+  description = "A cloned security group from existing one"
+  vpc_id      = data.aws_vpc.vpc.id  # Replace with your VPC ID
+
+  # Clone inbound rules
+  dynamic "ingress" {
+    for_each = data.aws_security_group.eks_sg.ingress
+
+    content {
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks  = ingress.value.cidr_blocks
+      security_groups = ingress.value.security_groups
+      self        = ingress.value.self
+    }
+  }
+
+  # Clone outbound rules
+  dynamic "egress" {
+    for_each = data.aws_security_group.eks_sg.egress
+
+    content {
+      from_port   = egress.value.from_port
+      to_port     = egress.value.to_port
+      protocol    = egress.value.protocol
+      cidr_blocks  = egress.value.cidr_blocks
+      security_groups = egress.value.security_groups
+      self        = egress.value.self
+    }
+  }
+}
+
+
 variable "recovery_eks_cluster" {
 }
 # EKS Cluster
@@ -173,8 +208,8 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
 
   vpc_config {
     subnet_ids         = [data.aws_subnet.subnet_1.id, data.aws_subnet.subnet_2.id]
-    # security_group_ids = [var.eks_sg]  # Attach existing security group
-    security_group_ids = [data.aws_security_group.eks_sg.id]
+    security_group_ids = [aws_security_group.new_sg.id]  # Attach existing security group
+    # security_group_ids = [data.aws_security_group.eks_sg.id]
   }
 
   depends_on = [
