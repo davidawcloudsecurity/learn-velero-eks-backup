@@ -164,7 +164,7 @@ data "aws_security_group" "eks_sg" {
 
 # Data source for the existing security group
 data "aws_security_group" "existing_sg" {
-  id = var.existing_sg_id
+  id = "sg-0b4fa5217bf3cc346"
 }
 
 # Data source to get all the rules of the existing security group
