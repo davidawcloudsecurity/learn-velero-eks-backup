@@ -552,9 +552,26 @@ EOF2
         # velero backup create ${var.primary_cluster}-backup
       else
         echo ""
-        echo "Create the backup"      
-        velero backup create ${var.primary_cluster}-backup
-        echo 
+        echo "Checking the backup date..."
+        # Get the creationTimestamp of the backup
+        backup_timestamp=$(velero backup get "$backup_name" -o json | grep -oP '"creationTimestamp": "\K[^"]+')
+        # Get the current date in the same format (UTC time)
+        current_date=$(date -u +"%Y-%m-%d")
+        # Extract the date part from the backup timestamp
+        backup_date=$(echo "$backup_timestamp" | cut -d'T' -f1)
+        # Compare the backup date with the current date
+        if [ "$backup_date" != "$current_date" ]; then
+          echo "Backup is outdated. Deleting and recreating the backup."
+          # Delete the old backup
+          velero backup delete ${var.primary_cluster}-backup --confirm
+          kubectl -n velero delete backup ${var.primary_cluster}-backup
+          echo "Sleep 30s"
+          sleep 30
+          echo "Backup creating..."
+          velero backup create ${var.primary_cluster}-backup
+        else
+          echo "Backup is up to date."
+        fi
       fi
       # Exit if timeout reached
       SLEEP_TIME=10
