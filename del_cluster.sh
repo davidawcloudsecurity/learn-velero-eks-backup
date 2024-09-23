@@ -60,7 +60,7 @@ FARGATE_PROFILES=$(aws eks list-fargate-profiles --cluster-name $CLUSTER_NAME --
 
 for PROFILE in $FARGATE_PROFILES; do
   echo "Deleting Fargate profile: $PROFILE"
-  aws eks delete-fargate-profile --cluster-name $CLUSTER_NAME --fargate-profile-name $PROFILE --region $REGION
+  aws eks delete-fargate-profile --cluster-name $CLUSTER_NAME --fargate-profile-name $PROFILE --region $REGION > /dev/null 2>&1
 
   # Wait for the profile to be completely deleted before moving to the next one
   wait_for_fargate_profile_deletion $PROFILE
@@ -68,7 +68,7 @@ done
 
 # Step 2: Delete EKS cluster
 echo "Deleting EKS cluster: $CLUSTER_NAME"
-aws eks delete-cluster --name $CLUSTER_NAME --region $REGION
+aws eks delete-cluster --name $CLUSTER_NAME --region $REGION > /dev/null 2>&1
 
 # Step 3: Wait for the EKS cluster to be deleted
 wait_for_cluster_deletion
