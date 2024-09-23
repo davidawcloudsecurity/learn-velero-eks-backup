@@ -554,13 +554,13 @@ EOF2
         echo ""
         echo "Checking the backup date..."
         # Get the creationTimestamp of the backup
-        backup_timestamp=$(velero backup get "$backup_name" -o json | grep -oP '"creationTimestamp": "\K[^"]+')
+        backup_timestamp=$(velero backup get "${var.primary_cluster}-backup" -o json | grep -oP '"creationTimestamp": "\K[^"]+')
         # Get the current date in the same format (UTC time)
         current_date=$(date -u +"%Y-%m-%d")
         # Extract the date part from the backup timestamp
         backup_date=$(echo "$backup_timestamp" | cut -d'T' -f1)
         # Compare the backup date with the current date
-        if [ "$backup_date" != "$current_date" ]; then
+        if [ "${var.primary_cluster}-backup" != "$current_date" ]; then
           echo "Backup is outdated. Deleting and recreating the backup."
           # Delete the old backup
           velero backup delete ${var.primary_cluster}-backup --confirm
