@@ -604,10 +604,13 @@ EOF2
       while true; do
         if kubectl get pods -n velero | grep Running > /dev/null 2>&1; then
           echo "Velero pods running"
+          kubectl get events -A
+          kubectl get pods -A
           break
         fi
         echo "Waiting for velero pods to be running"
         kubectl logs deploy/velero -n velero --tail=10
+        kubectl get events -A 
         sleep 10
       done
       while true; do
