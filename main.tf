@@ -490,7 +490,7 @@ EOF2
               sleep 10
             else
               echo "Helm install velero in primary cluster"
-              helm uninstall velero -n velero
+              helm uninstall velero -n velero > /dev/null 2>&1
               helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
               kubectl get events -n velero
               break
@@ -499,7 +499,7 @@ EOF2
         else
           echo "Velero namespace exists, skipping Fargate profile creation"
           echo "Helm install velero in primary cluster"
-          helm uninstall velero -n velero
+          helm uninstall velero -n velero > /dev/null 2>&1
           helm install velero vmware-tanzu/velero --create-namespace --namespace velero -f values.yaml
         fi            
       else
