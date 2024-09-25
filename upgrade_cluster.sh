@@ -107,7 +107,7 @@ for VERSION in "${VERSIONS[@]}"; do
 
     # Wait for the nodes to be recycled
     echo "Restarting all Fargate pods and deployments after upgrade..."
-    kubectl rollout restart deployment --all --all-namespaces
+    kubectl rollout restart deployment --all-namespaces
 
     # Check node versions
     check_node_versions "$VERSION"
