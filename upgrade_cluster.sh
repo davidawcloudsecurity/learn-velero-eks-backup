@@ -42,11 +42,16 @@ upgrade_cluster_version() {
     check_node_versions "$target_version"
     # Restart all deployments in all namespaces
     restart_deployments
-    if [ "$ALL_MATCH" = true ]; then
-      echo "All nodes are running the target version v$target_version."
-    else
-      echo "Some nodes have not been upgraded to the target version."
-    fi
+    while true; do
+      check_node_versions "$target_version"
+      if [ "$ALL_MATCH" = true ]; then
+        echo "All nodes are running the target version v$target_version."
+        break
+      else
+        echo "Some nodes have not been upgraded to the target version."
+        delete_pod
+        sleep 300
+      fi
   fi
 
   # Monitor the status of the upgrade
@@ -71,6 +76,27 @@ upgrade_cluster_version() {
       COUNTER=$((COUNTER+1))
     fi
   done
+}
+
+# Function to delete pods
+delete_pod() {
+  # Get all namespaces
+  NAMESPACES=$(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}')
+  
+  # Loop through each namespace
+  for NAMESPACE in $NAMESPACES; do
+    echo "Deleting all pods in namespace: $NAMESPACE"
+    
+    # Delete all pods in the current namespace
+    kubectl delete pods --all --namespace="$NAMESPACE"
+  
+    if [[ $? -eq 0 ]]; then
+      echo "All pods deleted successfully in namespace: $NAMESPACE"
+    else
+      echo "Failed to delete pods in namespace: $NAMESPACE"
+    fi
+  done
+  echo "All pods in all namespaces have been deleted."
 }
 
 # Function to check node versions
