@@ -194,7 +194,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy_attachment" {
 resource "aws_security_group" "recovery_eks_cls_sg_1" {
   name        = "recovery_eks_sg_1"
   description = "Security group for EKS Cluster 1"
-  vpc_id      = data.aws_vpc.vpc
+  vpc_id      = data.aws_vpc.vpc.id
 
   ingress {
     from_port   = 0
