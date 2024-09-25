@@ -192,9 +192,10 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy_attachment" {
 
 # EKS Cluster
 resource "aws_eks_cluster" "recovery_eks_cluster" {
-  name = var.recovery_eks_cluster
-  version = var.cluster_version
-  role_arn = data.aws_iam_role.eks_role.arn
+  name     = var.recovery_eks_cluster
+  version  = var.cluster_version
+  role_arn = aws_iam_role.recovery_eks_cluster_role.arn
+  # role_arn = data.aws_iam_role.eks_role.arn
 
   vpc_config {
     subnet_ids         = [data.aws_subnet.subnet_1.id, data.aws_subnet.subnet_2.id]
