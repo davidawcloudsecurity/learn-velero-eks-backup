@@ -52,6 +52,7 @@ upgrade_cluster_version() {
         delete_pod
         sleep 300
       fi
+    done
   fi
 
   # Monitor the status of the upgrade
