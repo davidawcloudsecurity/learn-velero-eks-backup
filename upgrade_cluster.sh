@@ -39,7 +39,9 @@ upgrade_cluster_version() {
 
   if [[ $? -ne 0 ]]; then
     echo "Failed to start cluster upgrade to version $target_version..."
-    exit 1
+    echo "Checking nodes..."
+    check_node_versions "$target_version"
+    # exit 1
   fi
 
   # Monitor the status of the upgrade
