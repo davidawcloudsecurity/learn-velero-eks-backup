@@ -33,8 +33,8 @@ upgrade_cluster_version() {
     --kubernetes-version "$target_version"
 
   if [[ $? -ne 0 ]]; then
-    echo "Failed to start cluster upgrade to version $target_version. Exiting."
-    exit 1
+    echo "Failed to start cluster upgrade to version $target_version. Looping."
+    # exit 1
   fi
 
   # Monitor the status of the upgrade
@@ -55,24 +55,42 @@ upgrade_cluster_version() {
   done
 }
 
-# Get the current cluster version
-CURRENT_VERSION=$(aws eks describe-cluster \
-  --name "$CLUSTER_NAME" \
-  --region "$REGION" \
-  --query 'cluster.version' \
-  --output text)
+# Function to check the current version of the cluster
+get_current_version() {
+  aws eks describe-cluster \
+    --name "$CLUSTER_NAME" \
+    --region "$REGION" \
+    --query 'cluster.version' \
+    --output text
+}
 
+# Get the current cluster version
+CURRENT_VERSION=$(get_current_version)
 echo "Current Kubernetes version: $CURRENT_VERSION"
 
 # Loop through the version upgrades
 for VERSION in "${VERSIONS[@]}"; do
-  # Only upgrade if the current version is less than the target version
-  if [[ "$CURRENT_VERSION" < "$VERSION" ]]; then
+  # Loop to check if the current version is less than the target version
+  while [[ "$CURRENT_VERSION" < "$VERSION" ]]; do
     # Upgrade cluster version
     upgrade_cluster_version "$VERSION"
 
-    # After upgrade, set the current version to the newly upgraded version
-    CURRENT_VERSION="$VERSION"
+    # Wait and check if the version has been upgraded before moving to the next version
+    CURRENT_VERSION=$(get_current_version)
+    echo "New current version: $CURRENT_VERSION"
+
+    # Exit the loop if the upgrade to the current version is complete
+    if [[ "$CURRENT_VERSION" == "$VERSION" ]]; then
+      echo "Upgrade to version $VERSION completed."
+      break
+    else
+      echo "Waiting for cluster to reach version $VERSION..."
+      sleep 60
+    fi
+  done
+
+  if [[ "$CURRENT_VERSION" == "$VERSION" ]]; then
+    echo "Cluster is now at version $VERSION."
   else
     echo "Cluster is already at or above version $VERSION. Skipping..."
   fi
