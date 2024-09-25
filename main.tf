@@ -190,33 +190,6 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-# SG for EKS Cluster
-resource "aws_security_group" "recovery_eks_cls_sg_1" {
-  name        = "recovery_eks_sg_1"
-  description = "Security group for EKS Cluster 1"
-  vpc_id      = data.aws_vpc.vpc.id
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    security_groups = [data.aws_security_group.eks_sg.id]
-  }
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    self        = true
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
 
 # EKS Cluster
 resource "aws_eks_cluster" "recovery_eks_cluster" {
@@ -226,7 +199,6 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
 
   vpc_config {
     subnet_ids         = [data.aws_subnet.subnet_1.id, data.aws_subnet.subnet_2.id]
-    security_group_ids = [aws_security_group.recovery_eks_cls_sg_1.id]
     # security_group_ids = [var.eks_sg]  # Attach existing security group
     # security_group_ids = [data.aws_security_group.eks_sg.id]
   }
@@ -325,6 +297,23 @@ provider "kubernetes" {
 
 data "aws_eks_cluster_auth" "auth" {
   name = aws_eks_cluster.recovery_eks_cluster.name
+}
+
+# Data block to retrieve the existing security group A (the one you want to modify)
+data "aws_security_group" "sg_a" {
+  id = aws_eks_cluster.recovery_eks_cluster.security_group_id
+  # id = "sg-0123456789abcdef"  # Replace with the ID of security group A
+}
+
+# Add an inbound rule to allow traffic from security group B to security group A
+resource "aws_security_group_rule" "allow_sg_b_inbound" {
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"  # Allows all protocols
+  security_group_id        = data.aws_security_group.sg_a.id  # Security group A (target)
+  source_security_group_id = data.aws_security_group.eks_sg.id  # Security group B (source)
+  description              = "Allow all traffic from security group B"
 }
 
 # Outputs
