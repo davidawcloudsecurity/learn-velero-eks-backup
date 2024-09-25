@@ -190,7 +190,6 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-
 # EKS Cluster
 resource "aws_eks_cluster" "recovery_eks_cluster" {
   name = var.recovery_eks_cluster
@@ -297,23 +296,6 @@ provider "kubernetes" {
 
 data "aws_eks_cluster_auth" "auth" {
   name = aws_eks_cluster.recovery_eks_cluster.name
-}
-
-# Data block to retrieve the existing security group A (the one you want to modify)
-data "aws_security_group" "sg_a" {
-  id = aws_eks_cluster.recovery_eks_cluster.security_group_id
-  # id = "sg-0123456789abcdef"  # Replace with the ID of security group A
-}
-
-# Add an inbound rule to allow traffic from security group B to security group A
-resource "aws_security_group_rule" "allow_sg_b_inbound" {
-  type                     = "ingress"
-  from_port                = 0
-  to_port                  = 0
-  protocol                 = "-1"  # Allows all protocols
-  security_group_id        = data.aws_security_group.sg_a.id  # Security group A (target)
-  source_security_group_id = data.aws_security_group.eks_sg.id  # Security group B (source)
-  description              = "Allow all traffic from security group B"
 }
 
 # Outputs
@@ -728,6 +710,9 @@ EOF2
       echo "Update the IAM role's trust policy"
       aws iam update-assume-role-policy --role-name ${var.aws_load_balancer_role} --policy-document file://updated-trust-policy-final.json
       echo "Trust policy updated successfully."
+      echo "Append ${data.aws_security_group.eks_sg.id} to Inbound rule of Recovery EKS CLS's SG ${var.recovery_eks_cluster}"
+      recovery_cluster_sg=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --query "cluster.resourcesVpcConfig.clusterSecurityGroupId" --output text)
+      aws ec2 authorize-security-group-ingress --group-id $recovery_cluster_sg --protocol -1 --port 0 --source-group ${data.aws_security_group.eks_sg.id}
     EOT
   }
 
