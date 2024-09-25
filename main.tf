@@ -551,18 +551,18 @@ EOF2
         # echo "Sleep 30s"
         # sleep 30
         echo "Backup exist, no need to clone. Restoring..."
-        velero restore create ${var.primary_cluster}-restore02 \
+        velero restore create ${var.primary_cluster}-recovery \
         --from-backup ${var.primary_cluster}-backup
         while true; do
-          if velero restore get | grep -q Completed || velero restore get | grep -q "restore completed"; then
+          if velero restore get ${var.primary_cluster}-recovery | grep -q Completed || velero restore get ${var.primary_cluster}-recovery | grep -q "restore completed"; then
             echo "Velero restore completed"
             kubectl logs deploy/velero -n velero --tail=5
             break
-          elif velero restore get | grep Fail > /dev/null 2>&1; then
+          elif velero restore get ${var.primary_cluster}-recovery | grep Fail > /dev/null 2>&1; then
             echo "Velero restore failed. Restarting"
             velero backup-location get
             velero backup get
-            velero restore get
+            velero restore get ${var.primary_cluster}-recovery
             kubectl logs deploy/velero -n velero --tail=10
             # velero restore create ${var.primary_cluster}-restore02 \
             # --from-backup ${var.primary_cluster}-backup
