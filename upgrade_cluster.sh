@@ -1,5 +1,9 @@
 #!/bin/bash
 
+SLEEP_TIME=60
+COUNTER=0
+MAX_CHECKS=15
+
 # Check if both inputs are provided
 if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <cluster_name> <region>"
@@ -50,7 +54,13 @@ upgrade_cluster_version() {
       break
     else
       echo "Cluster status: $STATUS. Waiting for the upgrade to complete..."
-      sleep 60
+      if [ "${COUNTER}" -ge "${MAX_CHECKS}" ]; then
+        echo "Reached maximum checks (${MAX_CHECKS}). Exiting."
+        exit 1
+      fi
+      Waiting for ${SLEEP_TIME} seconds before checking again."
+      sleep ${SLEEP_TIME}
+      COUNTER=$((COUNTER+1))
     fi
   done
 }
