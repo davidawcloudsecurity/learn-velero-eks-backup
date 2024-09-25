@@ -300,6 +300,14 @@ kubectl get events --sort-by='.lastTimestamp'
 kubectl get ns velero -o json | jq '.spec.finalizers = []' | kubectl replace --raw "/api/v1/namespaces/velero/finalize" -f -
 kubectl scale --replicas=3 deploy xyz -n namespace
 ```
+Use this to filter specifics - https://velero.io/docs/v1.4/resource-filtering/
+
+Use this to overwrite everything
+```bash
+velero restore create "${var.primary_cluster}-restore" \
+              --from-backup "${var.primary_cluster}-backup" --\
+              --existing-resource-policy=update
+```
 Resource - https://bluexp.netapp.com/blog/cbs-aws-blg-eks-back-up-how-to-back-up-and-restore-eks-with-velero
 
 How to map users/roles to new/existing clusters thru configmap - https://medium.com/@radha.sable25/enabling-iam-users-roles-access-on-amazon-eks-cluster-f69b485c674f
