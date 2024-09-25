@@ -58,7 +58,7 @@ upgrade_cluster_version() {
         echo "Reached maximum checks (${MAX_CHECKS}). Exiting."
         exit 1
       fi
-      Waiting for ${SLEEP_TIME} seconds before checking again."
+      echo "Waiting for ${SLEEP_TIME} seconds before checking again."
       sleep ${SLEEP_TIME}
       COUNTER=$((COUNTER+1))
     fi
