@@ -40,6 +40,13 @@ upgrade_cluster_version() {
   if [[ $? -ne 0 ]]; then
     echo "Failed to start cluster upgrade to version $target_version..."
     check_node_versions "$target_version"
+    # Restart all deployments in all namespaces
+    restart_deployments
+    if [ "$ALL_MATCH" = true ]; then
+      echo "All nodes are running the target version v$target_version."
+    else
+      echo "Some nodes have not been upgraded to the target version."
+    fi
   fi
 
   # Monitor the status of the upgrade
@@ -89,7 +96,7 @@ check_node_versions() {
     echo "Some nodes have not been upgraded to the target version."
   fi
 
-  echo $ALL_MATCH
+  export $ALL_MATCH
 }
 
 # Function to restart deployments in all namespaces
@@ -156,8 +163,6 @@ for VERSION in "${VERSIONS[@]}"; do
 
     # Loop to ensure all nodes are upgraded before moving to the next version
     while true; do
-      # Restart all deployments in all namespaces
-      restart_deployments
 
       # Check pod statuses
       ALL_PODS_READY=$(check_pod_status)
@@ -176,7 +181,6 @@ for VERSION in "${VERSIONS[@]}"; do
       else
         echo "Not all pods are in Running or Completed state. Retrying..."
       fi
-
       # Wait before retrying
       sleep ${SLEEP_TIME}
     done
