@@ -37,7 +37,7 @@ upgrade_cluster_version() {
     --kubernetes-version "$target_version"
 
   if [[ $? -ne 0 ]]; then
-    echo "Failed to start cluster upgrade to version $target_version. Looping."
+    echo "Failed to start cluster upgrade to version $target_version..."
     # exit 1
   fi
 
@@ -65,42 +65,55 @@ upgrade_cluster_version() {
   done
 }
 
-# Function to check the current version of the cluster
-get_current_version() {
-  aws eks describe-cluster \
-    --name "$CLUSTER_NAME" \
-    --region "$REGION" \
-    --query 'cluster.version' \
-    --output text
+# Function to check node versions
+check_node_versions() {
+  local target_version=$1
+  echo "Checking if all nodes are upgraded to version $target_version..."
+
+  ALL_MATCH=true
+  # Loop through all nodes and check their Kubelet versions
+  for NODE in $(kubectl get nodes -o jsonpath='{.items[*].metadata.name}'); do
+    NODE_VERSION=$(kubectl get node $NODE -o jsonpath='{.status.nodeInfo.kubeletVersion}')
+    echo "Node $NODE is running version $NODE_VERSION"
+
+    if [[ "$NODE_VERSION" != "v$target_version" ]]; then
+      ALL_MATCH=false
+      echo "Node $NODE has not been upgraded yet."
+    fi
+  done
+
+  if [ "$ALL_MATCH" = true ]; then
+    echo "All nodes are running the target version v$target_version."
+  else
+    echo "Some nodes have not been upgraded to the target version."
+  fi
 }
 
 # Get the current cluster version
-CURRENT_VERSION=$(get_current_version)
+CURRENT_VERSION=$(aws eks describe-cluster \
+  --name "$CLUSTER_NAME" \
+  --region "$REGION" \
+  --query 'cluster.version' \
+  --output text)
+
 echo "Current Kubernetes version: $CURRENT_VERSION"
 
 # Loop through the version upgrades
 for VERSION in "${VERSIONS[@]}"; do
-  # Loop to check if the current version is less than the target version
-  while [[ "$CURRENT_VERSION" < "$VERSION" ]]; do
+  # Only upgrade if the current version is less than the target version
+  if [[ "$CURRENT_VERSION" < "$VERSION" ]]; then
     # Upgrade cluster version
     upgrade_cluster_version "$VERSION"
 
-    # Wait and check if the version has been upgraded before moving to the next version
-    CURRENT_VERSION=$(get_current_version)
-    echo "New current version: $CURRENT_VERSION"
+    # Wait for the nodes to be recycled
+    echo "Restarting all Fargate pods and deployments after upgrade..."
+    kubectl rollout restart deployment --all --all-namespaces
 
-    # Exit the loop if the upgrade to the current version is complete
-    if [[ "$CURRENT_VERSION" == "$VERSION" ]]; then
-      echo "Upgrade to version $VERSION completed."
-      break
-    else
-      echo "Waiting for cluster to reach version $VERSION..."
-      sleep 60
-    fi
-  done
+    # Check node versions
+    check_node_versions "$VERSION"
 
-  if [[ "$CURRENT_VERSION" == "$VERSION" ]]; then
-    echo "Cluster is now at version $VERSION."
+    # After upgrade, set the current version to the newly upgraded version
+    CURRENT_VERSION="$VERSION"
   else
     echo "Cluster is already at or above version $VERSION. Skipping..."
   fi
