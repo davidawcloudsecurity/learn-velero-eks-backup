@@ -27,6 +27,7 @@ VERSIONS=("1.25" "1.26" "1.27" "1.28" "1.29" "1.30")
 # Function to upgrade the EKS cluster
 upgrade_cluster_version() {
   local target_version=$1
+  COUNTER=0 # Reset counter for each upgrade attempt
 
   echo "Upgrading cluster $CLUSTER_NAME to Kubernetes version $target_version..."
 
@@ -38,7 +39,7 @@ upgrade_cluster_version() {
 
   if [[ $? -ne 0 ]]; then
     echo "Failed to start cluster upgrade to version $target_version..."
-    # exit 1
+    exit 1
   fi
 
   # Monitor the status of the upgrade
@@ -87,6 +88,8 @@ check_node_versions() {
   else
     echo "Some nodes have not been upgraded to the target version."
   fi
+
+  echo $ALL_MATCH
 }
 
 # Function to restart deployments in all namespaces
@@ -124,14 +127,25 @@ for VERSION in "${VERSIONS[@]}"; do
     # Upgrade cluster version
     upgrade_cluster_version "$VERSION"
 
-    # Wait for the nodes to be recycled
-    echo "Restarting all Fargate pods and deployments after upgrade..."
-    restart_deployments  # Restart deployments using the for loop
+    # Loop to ensure all nodes are upgraded before moving to the next version
+    while true; do
+      # Restart all deployments in all namespaces
+      restart_deployments
 
-    # Check node versions
-    check_node_versions "$VERSION"
+      # Check node versions
+      ALL_MATCH=$(check_node_versions "$VERSION")
 
-    # After upgrade, set the current version to the newly upgraded version
+      # If all nodes match, break the loop and move to the next version
+      if [ "$ALL_MATCH" = true ]; then
+        echo "All nodes have been upgraded to version $VERSION."
+        break
+      else
+        echo "Not all nodes are upgraded to version $VERSION. Retrying..."
+        sleep ${SLEEP_TIME}
+      fi
+    done
+
+    # Update the current version to the newly upgraded version
     CURRENT_VERSION="$VERSION"
   else
     echo "Cluster is already at or above version $VERSION. Skipping..."
