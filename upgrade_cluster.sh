@@ -89,6 +89,25 @@ check_node_versions() {
   fi
 }
 
+# Function to restart deployments in all namespaces
+restart_deployments() {
+  echo "Restarting all deployments in all namespaces..."
+
+  # Get all namespaces
+  for NAMESPACE in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
+    echo "Restarting deployments in namespace: $NAMESPACE"
+    
+    # Restart all deployments in the namespace
+    kubectl rollout restart deployment --namespace="$NAMESPACE"
+
+    if [[ $? -ne 0 ]]; then
+      echo "Failed to restart deployments in namespace $NAMESPACE."
+    else
+      echo "Successfully restarted deployments in namespace $NAMESPACE."
+    fi
+  done
+}
+
 # Get the current cluster version
 CURRENT_VERSION=$(aws eks describe-cluster \
   --name "$CLUSTER_NAME" \
@@ -107,7 +126,7 @@ for VERSION in "${VERSIONS[@]}"; do
 
     # Wait for the nodes to be recycled
     echo "Restarting all Fargate pods and deployments after upgrade..."
-    kubectl rollout restart deployment --all-namespaces
+    restart_deployments  # Restart deployments using the for loop
 
     # Check node versions
     check_node_versions "$VERSION"
