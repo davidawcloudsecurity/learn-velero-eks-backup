@@ -415,7 +415,7 @@ resource "null_resource" "create_oicd" {
       tar -xzvf velero-v1.14.1-linux-amd64.tar.gz -C /tmp && rm velero-v1.14.1-linux-amd64.tar.gz
       sudo mv /tmp/velero-v1.14.1-linux-amd64/velero /usr/local/bin
       # Get OIDC provider ID for the cluster
-      echo "Determine whether an IAM OIDC provider with your cluster's issuer ID is already in your account."
+      echo "Determine whether an IAM OIDC provider with your cluster's ${aws_eks_cluster.recovery_eks_cluster.name} issuer ID is already in your account."
       oidc_id=$(aws eks describe-cluster --name ${aws_eks_cluster.recovery_eks_cluster.name} --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
       # Check if the OIDC provider exists, and if not, associate it
       if ! aws iam list-open-id-connect-providers | grep -q "$oidc_id"; then
