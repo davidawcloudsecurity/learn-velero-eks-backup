@@ -33,7 +33,7 @@ CURRENT_VERSION=$(aws eks describe-cluster \
 echo "Current Kubernetes version: $CURRENT_VERSION"
 
 if [[ "$CURRENT_VERSION" = "$FINAL_VERSION" ]]; then
-  echo "Upgrading cluster $CLUSTER_NAME to $FINAL_VERSION completed"
+  echo "Upgrading Cluster Name: $CLUSTER_NAME to $FINAL_VERSION completed"
   exit 1
 fi
 
