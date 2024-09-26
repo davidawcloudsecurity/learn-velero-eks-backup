@@ -76,7 +76,7 @@ upgrade_cluster_version() {
   aws eks update-cluster-version \
     --name "$CLUSTER_NAME" \
     --region "$REGION" \
-    --kubernetes-version "$target_version"
+    --kubernetes-version "$target_version" > /dev/null 2>&1;
 
   if [[ $? -ne 0 ]]; then
     echo "Failed to start cluster upgrade to version $target_version."
