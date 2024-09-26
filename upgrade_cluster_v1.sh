@@ -83,14 +83,18 @@ upgrade_cluster_version() {
     check_node_versions "$target_version"
     exit 1
   fi
-
+  echo "Sleep ${SLEEP_TIME}"
+  sleep ${SLEEP_TIME}
   # Monitor the status of the upgrade
+  COUNTER=0
   while true; do
     STATUS=$(aws eks describe-cluster \
       --name "$CLUSTER_NAME" \
       --region "$REGION" \
       --query 'cluster.status' \
       --output text)
+
+      
 
     if [[ "$STATUS" == "ACTIVE" ]]; then
       echo "Cluster upgrade to version $target_version completed successfully."
