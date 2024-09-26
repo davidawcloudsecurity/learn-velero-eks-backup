@@ -173,8 +173,6 @@ for VERSION in "${VERSIONS[@]}"; do
       else
         echo "Not all nodes are upgraded to version $VERSION. Retrying..."
       fi
-      # Wait before retrying
-      sleep ${SLEEP_TIME}
     done
 
     # Update the current version to the newly upgraded version
