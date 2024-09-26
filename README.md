@@ -278,7 +278,7 @@ echo Fargate Role: $fargate_role; \
 echo VPCID: $vpcid; \
 echo SubNet1: $subnet_1; \
 echo SubNet2: $subnet_2; \
-echo EKS SG: $eks_sg; \
+echo Additional EKS SG: $add_eks_sg; \
 echo AWS Load Balancer: $aws_lb_role
 ```
 ```bash
