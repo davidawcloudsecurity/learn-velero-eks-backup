@@ -718,7 +718,7 @@ EOF2
         {
           "op": "add",
           "path": "/data/mapRoles",
-          "value": "- rolearn: arn:aws:iam::${var.account_id}:role/project-trust-platform-role\n  username: project-trust-platform-role\n  groups:\n    - system:masters\n"
+          "value": "- groups:\n    - system:bootstrappers\n    - system:nodes\n    - system:node-proxier\n  rolearn: arn:aws:iam::${var.account_id}:role/${var.fargate_role}\n  username: system:node:{{SessionName}}\n  - rolearn: project\n  username: project\n  groups:\n    - system:masters\n- rolearn: arn:aws:iam::${var.account_id}:role/project-trust-platform-role\n  username: project-trust-platform-role\n  groups:\n    - system:masters\n" 
         }
       ]'
     EOT
