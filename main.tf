@@ -207,7 +207,7 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
     data.aws_vpc.vpc,
     data.aws_subnet.subnet_1,
     data.aws_subnet.subnet_2,
-    data.aws_security_group.eks_sg
+    data.aws_security_group.add_eks_sg
   ]
 }
 
