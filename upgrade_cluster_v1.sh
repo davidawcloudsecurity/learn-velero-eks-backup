@@ -137,7 +137,7 @@ check_node_versions() {
   ALL_MATCH=true
   # Loop through all nodes and check their Kubelet versions
   for NODE in $(kubectl get nodes -o jsonpath='{.items[*].metadata.name}'); do
-    NODE_VERSION=$(kubectl get node $NODE -o jsonpath='{.status.nodeInfo.kubeletVersion}')
+    NODE_VERSION=$(kubectl get node $NODE -o jsonpath='{.status.nodeInfo.kubeletVersion}' | cut -d'.' -f1-2)
     echo "Node $NODE is running version $NODE_VERSION"
 
     if [[ "$NODE_VERSION" != "$target_version" ]]; then
