@@ -164,6 +164,7 @@ for VERSION in "${VERSIONS[@]}"; do
     while true; do
       check_node_versions "$VERSION"
       delete_pods
+      echo "Sleep ${SLEEP_TIME}"
       sleep ${SLEEP_TIME}
       # If all nodes match, break the loop and move to the next version
       if [ "$ALL_MATCH" = true ]; then
