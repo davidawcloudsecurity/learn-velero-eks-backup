@@ -200,7 +200,7 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
   vpc_config {
     subnet_ids         = [data.aws_subnet.subnet_1.id, data.aws_subnet.subnet_2.id]
     # security_group_ids = [var.eks_sg]  # Attach existing security group
-    # security_group_ids = [data.aws_security_group.eks_sg.id]
+    security_group_ids = [data.aws_security_group.eks_sg.id]
   }
 
   depends_on = [
@@ -712,8 +712,9 @@ EOF2
       aws iam update-assume-role-policy --role-name ${var.aws_load_balancer_role} --policy-document file://updated-trust-policy-final.json
       echo "Trust policy updated successfully."
       echo "Append ${data.aws_security_group.eks_sg.id} to Inbound rule of Recovery EKS CLS's SG ${var.recovery_eks_cluster}"
-      recovery_cluster_sg=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --query "cluster.resourcesVpcConfig.clusterSecurityGroupId" --output text)
-      aws ec2 authorize-security-group-ingress --group-id $recovery_cluster_sg --protocol -1 --port 0 --source-group ${data.aws_security_group.eks_sg.id}
+      recovery_cluster_sg=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --query "cluster.resourcesVpcConfig.securityGroupIds" --output text)
+      nlb_sg=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=*ingress*" --query 'SecurityGroups[*].{ID:GroupId}' --output text)
+      aws ec2 authorize-security-group-ingress --group-id $recovery_cluster_sg --protocol -1 --port 0 --source-group $nlb_sg
     EOT
   }
 
