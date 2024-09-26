@@ -1,7 +1,7 @@
 #!/bin/bash
 COUNTER=0
 MAX_CHECKS=15
-SLEEP_TIME=300
+SLEEP_TIME=60
 
 # Check if both inputs are provided
 if [ "$#" -ne 2 ]; then
