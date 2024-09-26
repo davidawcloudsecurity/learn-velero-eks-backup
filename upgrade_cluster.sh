@@ -38,21 +38,8 @@ upgrade_cluster_version() {
     --kubernetes-version "$target_version"
 
   if [[ $? -ne 0 ]]; then
-    echo "Failed to start cluster upgrade to version $target_version..."
-    check_node_versions "$target_version"
-    # Delete all pods in all namespaces
-    delete_pod
-    while true; do
-      check_node_versions "$target_version"
-      if [ "$ALL_MATCH" = true ]; then
-        echo "All nodes are running the target version v$target_version."
-        break
-      else
-        echo "Some nodes have not been upgraded to the target version."
-        check_node_versions "$target_version"
-        sleep 10
-      fi
-    done
+    echo "Failed to start cluster upgrade to version $target_version."
+    exit 1
   fi
 
   # Monitor the status of the upgrade
@@ -123,7 +110,7 @@ check_node_versions() {
     echo "Some nodes have not been upgraded to the target version."
   fi
 
-  export $ALL_MATCH
+  export ALL_MATCH
 }
 
 # Function to restart deployments in all namespaces
@@ -145,33 +132,6 @@ restart_deployments() {
   done
 }
 
-# Function to check if all pods are in Running or Completed status
-check_pod_status() {
-  echo "Checking the status of all pods..."
-  
-  ALL_PODS_READY=true
-  
-  # Loop through all namespaces and pods to check their status
-  for NAMESPACE in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
-    for POD in $(kubectl get pods --namespace="$NAMESPACE" -o jsonpath='{.items[*].metadata.name}'); do
-      POD_STATUS=$(kubectl get pod "$POD" --namespace="$NAMESPACE" -o jsonpath='{.status.phase}')
-      
-      if [[ "$POD_STATUS" != "Running" && "$POD_STATUS" != "Succeeded" ]]; then
-        echo "Pod $POD in namespace $NAMESPACE is not ready. Current status: $POD_STATUS"
-        ALL_PODS_READY=false
-      fi
-    done
-  done
-
-  if [ "$ALL_PODS_READY" = true ]; then
-    echo "All pods are in Running or Completed state."
-  else
-    echo "Not all pods are ready yet."
-  fi
-
-  echo $ALL_PODS_READY
-}
-
 # Get the current cluster version
 CURRENT_VERSION=$(aws eks describe-cluster \
   --name "$CLUSTER_NAME" \
@@ -190,23 +150,14 @@ for VERSION in "${VERSIONS[@]}"; do
 
     # Loop to ensure all nodes are upgraded before moving to the next version
     while true; do
+      check_node_versions "$VERSION"
 
-      # Check pod statuses
-      ALL_PODS_READY=$(check_pod_status)
-
-      # If all pods are in Running or Completed state, check node versions
-      if [ "$ALL_PODS_READY" = true ]; then
-        ALL_MATCH=$(check_node_versions "$VERSION")
-
-        # If all nodes match, break the loop and move to the next version
-        if [ "$ALL_MATCH" = true ]; then
-          echo "All nodes and pods are ready for version $VERSION."
-          break
-        else
-          echo "Not all nodes are upgraded to version $VERSION. Retrying..."
-        fi
+      # If all nodes match, break the loop and move to the next version
+      if [ "$ALL_MATCH" = true ]; then
+        echo "All nodes are ready for version $VERSION."
+        break
       else
-        echo "Not all pods are in Running or Completed state. Retrying..."
+        echo "Not all nodes are upgraded to version $VERSION. Retrying..."
       fi
       # Wait before retrying
       sleep ${SLEEP_TIME}
