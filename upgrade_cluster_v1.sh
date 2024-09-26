@@ -32,36 +32,6 @@ CURRENT_VERSION=$(aws eks describe-cluster \
 
 echo "Current Kubernetes version: $CURRENT_VERSION"
 
-# Loop through the version upgrades
-for VERSION in "${VERSIONS[@]}"; do
-  # Only upgrade if the current version is less than the target version
-  if [[ "$CURRENT_VERSION" < "$VERSION" ]]; then
-    # Upgrade cluster version
-    upgrade_cluster_version "$VERSION"
-
-    # Loop to ensure all nodes are upgraded before moving to the next version
-    while true; do
-      check_node_versions "$VERSION"
-      delete_pods
-      sleep ${SLEEP_TIME}
-      # If all nodes match, break the loop and move to the next version
-      if [ "$ALL_MATCH" = true ]; then
-        echo "All nodes are ready for version $VERSION."
-        break
-      else
-        echo "Not all nodes are upgraded to version $VERSION. Retrying..."
-      fi
-      # Wait before retrying
-      sleep ${SLEEP_TIME}
-    done
-
-    # Update the current version to the newly upgraded version
-    CURRENT_VERSION="$VERSION"
-  else
-    echo "Cluster is already at or above version $VERSION. Skipping..."
-  fi
-done
-
 # Function to upgrade the EKS cluster
 upgrade_cluster_version() {
   local target_version=$1
@@ -182,5 +152,35 @@ check_node_versions() {
     echo "Some nodes have not been upgraded to the target version."
   fi
 }
+
+# Loop through the version upgrades
+for VERSION in "${VERSIONS[@]}"; do
+  # Only upgrade if the current version is less than the target version
+  if [[ "$CURRENT_VERSION" < "$VERSION" ]]; then
+    # Upgrade cluster version
+    upgrade_cluster_version "$VERSION"
+
+    # Loop to ensure all nodes are upgraded before moving to the next version
+    while true; do
+      check_node_versions "$VERSION"
+      delete_pods
+      sleep ${SLEEP_TIME}
+      # If all nodes match, break the loop and move to the next version
+      if [ "$ALL_MATCH" = true ]; then
+        echo "All nodes are ready for version $VERSION."
+        break
+      else
+        echo "Not all nodes are upgraded to version $VERSION. Retrying..."
+      fi
+      # Wait before retrying
+      sleep ${SLEEP_TIME}
+    done
+
+    # Update the current version to the newly upgraded version
+    CURRENT_VERSION="$VERSION"
+  else
+    echo "Cluster is already at or above version $VERSION. Skipping..."
+  fi
+done
 
 echo "Cluster has been successfully upgraded to the target version $FINAL_VERSION."
