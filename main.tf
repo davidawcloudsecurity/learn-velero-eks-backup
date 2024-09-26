@@ -710,9 +710,9 @@ EOF2
       echo "Update the IAM role's trust policy"
       aws iam update-assume-role-policy --role-name ${var.aws_load_balancer_role} --policy-document file://updated-trust-policy-final.json
       echo "Trust policy updated successfully."
-      echo "Append ${data.aws_security_group.eks_sg.id} to Inbound rule of Recovery EKS CLS's SG ${var.recovery_eks_cluster}"
-      recovery_cluster_sg=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --query "cluster.resourcesVpcConfig.securityGroupIds" --output text)
       nlb_sg=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=*ingress*" --query 'SecurityGroups[*].{ID:GroupId}' --output text)
+      recovery_cluster_sg=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --query "cluster.resourcesVpcConfig.securityGroupIds" --output text)
+      echo "Append $nlb_sg to Inbound rule of Recovery EKS CLS: ${var.recovery_eks_cluster} SG: $recovery_cluster_sg"     
       aws ec2 authorize-security-group-ingress --group-id $recovery_cluster_sg --protocol -1 --port 0 --source-group $nlb_sg
     EOT
   }
