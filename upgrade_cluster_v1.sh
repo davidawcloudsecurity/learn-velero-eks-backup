@@ -32,6 +32,11 @@ CURRENT_VERSION=$(aws eks describe-cluster \
 
 echo "Current Kubernetes version: $CURRENT_VERSION"
 
+if [[ "$CURRENT_VERSION" = "$FINAL_VERSION" ]]; then
+  echo "Upgrading cluster $CLUSTER_NAME to $FINAL_VERSION completed"
+  exit 1
+fi
+
 # Function to upgrade the EKS cluster
 upgrade_cluster_version() {
   local target_version=$1
@@ -93,8 +98,6 @@ upgrade_cluster_version() {
       --region "$REGION" \
       --query 'cluster.status' \
       --output text)
-
-      
 
     if [[ "$STATUS" == "ACTIVE" ]]; then
       echo "Cluster upgrade to version $target_version completed successfully."
