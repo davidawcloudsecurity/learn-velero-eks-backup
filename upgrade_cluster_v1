@@ -69,6 +69,7 @@ upgrade_cluster_version() {
   MAX_CHECKS=15
   SLEEP_TIME=60
 
+  # Ensure the cluster status is active and not updating
   while true; do
     STATUS=$(aws eks describe-cluster \
       --name "$CLUSTER_NAME" \
