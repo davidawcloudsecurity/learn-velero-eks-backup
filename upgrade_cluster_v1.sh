@@ -173,15 +173,16 @@ for VERSION in "${VERSIONS[@]}"; do
     # Loop to ensure all nodes are upgraded before moving to the next version
     while true; do
       check_node_versions "$VERSION"
-      delete_pods
-      echo "Sleep ${SLEEP_TIME}"
-      sleep ${SLEEP_TIME}
+
       # If all nodes match, break the loop and move to the next version
       if [ "$ALL_MATCH" = true ]; then
         echo "All nodes are ready for version $VERSION."
         break
       else
         echo "Not all nodes are upgraded to version $VERSION. Retrying..."
+        delete_pods
+        echo "Sleep ${SLEEP_TIME}"
+        sleep ${SLEEP_TIME}        
       fi
     done
 
