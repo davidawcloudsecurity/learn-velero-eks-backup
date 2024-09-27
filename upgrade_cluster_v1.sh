@@ -173,8 +173,6 @@ check_node_versions() {
 
   if [ "$ALL_MATCH" = true ]; then
     echo "All nodes are running the target version v$target_version."
-  else
-    echo "Some nodes have not been upgraded to the target version."
   fi
 }
 
