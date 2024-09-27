@@ -587,7 +587,7 @@ EOF2
         # Extract the date part from the backup timestamp
         backup_date=$(echo "$backup_timestamp" | cut -d'T' -f1)
         # Compare the backup date with the current date
-        if [ "${var.primary_cluster}-backup" != "$current_date" ]; then
+        if [ "$backup_date" != "$current_date" ]; then
           echo "Backup is outdated. Deleting and recreating the backup."
           # Delete the old backup
           velero backup delete ${var.primary_cluster}-backup --confirm
