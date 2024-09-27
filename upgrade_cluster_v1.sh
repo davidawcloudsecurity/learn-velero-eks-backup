@@ -124,7 +124,7 @@ delete_pods() {
   
   # Loop through each namespace
   for NAMESPACE in $NAMESPACES; do
-  # Delete all pods in the specified namespace
+  echo "Deleting all pods in namespace: $NAMESPACE"
   OUTPUT=$(kubectl delete pods --all --namespace="$NAMESPACE" 2>&1)
   # Check if the command was successful or if no resources were found
   if echo "$OUTPUT" | grep -q "No resources found"; then
