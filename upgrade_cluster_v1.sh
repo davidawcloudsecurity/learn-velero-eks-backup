@@ -87,8 +87,21 @@ upgrade_cluster_version() {
 
   if [[ $? -ne 0 ]]; then
     echo "Error: Failed to start cluster upgrade to version $target_version."
-    check_node_versions "$target_version"
-    exit 1
+    # Loop to ensure all nodes are upgraded before moving to the next version
+    while true; do
+      check_node_versions "$CURRENT_VERSION"
+
+      # If all nodes match, break the loop and move to the next version
+      if [ "$ALL_MATCH" = true ]; then
+        echo "All nodes are ready for version $CURRENT_VERSION."
+        break
+      else
+        echo "Not all nodes are upgraded to version $CURRENT_VERSION. Retrying..."
+        delete_pods
+        echo "Sleep ${SLEEP_TIME}"
+        sleep ${SLEEP_TIME}        
+      fi
+    done
   fi
   echo "Sleep ${SLEEP_TIME}"
   sleep ${SLEEP_TIME}
