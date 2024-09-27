@@ -3,6 +3,8 @@ COUNTER=0
 MAX_CHECKS=15
 SLEEP_TIME=60
 
+echo "Current time: $(date +"%Y-%m-%d %H:%M:%S")" >> record_file
+
 # Check if both inputs are provided
 if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <cluster_name> <region>"
@@ -190,3 +192,6 @@ for VERSION in "${VERSIONS[@]}"; do
 done
 
 echo "Cluster has been successfully upgraded to the target version $FINAL_VERSION."
+echo "End time: $(date +"%Y-%m-%d %H:%M:%S")" >> record_file
+cat record_file
+
