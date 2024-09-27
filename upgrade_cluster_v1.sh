@@ -7,7 +7,7 @@ echo "Current time: $(date +"%Y-%m-%d %H:%M:%S")" >> record_file
 
 # Check if both inputs are provided
 if [ "$#" -ne 2 ]; then
-  echo "Usage: $0 <cluster_name> <region>"
+  echo "Error: Usage: $0 <cluster_name> <region>"
   exit 1
 fi
 
@@ -57,7 +57,7 @@ upgrade_cluster_version() {
     if [[ "$STATUS" != "ACTIVE" ]]; then
         echo "Cluster status: $STATUS. Waiting for the upgrade to complete..."
         if [ "${COUNTER}" -ge "${MAX_CHECKS}" ]; then
-          echo "Reached maximum checks (${MAX_CHECKS}). Exiting."
+          echo "Error: Reached maximum checks (${MAX_CHECKS}). Exiting."
           exit 1
         fi
         echo "Waiting for ${SLEEP_TIME} seconds before checking again."
@@ -86,7 +86,7 @@ upgrade_cluster_version() {
     --kubernetes-version "$target_version" > /dev/null 2>&1;
 
   if [[ $? -ne 0 ]]; then
-    echo "Failed to start cluster upgrade to version $target_version."
+    echo "Error: Failed to start cluster upgrade to version $target_version."
     check_node_versions "$target_version"
     exit 1
   fi
@@ -107,7 +107,7 @@ upgrade_cluster_version() {
     else
       echo "Cluster status: $STATUS. Waiting for the upgrade to complete..."
       if [ "${COUNTER}" -ge "${MAX_CHECKS}" ]; then
-        echo "Reached maximum checks (${MAX_CHECKS}). Exiting."
+        echo "Error: Reached maximum checks (${MAX_CHECKS}). Exiting."
         exit 1
       fi
       echo "Waiting for ${SLEEP_TIME} seconds before checking again."
