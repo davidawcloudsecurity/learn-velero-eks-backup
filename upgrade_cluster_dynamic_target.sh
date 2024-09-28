@@ -50,10 +50,6 @@ check_node_versions() {
       echo "Node $NODE has not been upgraded yet, running version $NODE_VERSION"
     fi
   done
-
-  if [ "$ALL_MATCH" = true ]; then
-    echo "All nodes are running version v$target_version."
-  fi
 }
 
 # Function to increment the version
@@ -114,7 +110,7 @@ while [[ "$CURRENT_VERSION" != "$TARGET_VERSION" ]]; do
     check_node_versions "$NEXT_VERSION"
 
     if [ "$ALL_MATCH" = true ]; then
-      echo "All nodes are running version $NEXT_VERSION."
+      echo "All nodes are running version v$NEXT_VERSION."
       break
     else
       echo "Not all nodes are upgraded to version $NEXT_VERSION. Retrying..."
