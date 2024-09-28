@@ -79,35 +79,36 @@ check_node_versions() {
 }
 
 # Start the cluster upgrade
-  aws eks update-cluster-version \
+echo "Upgrading the cluster..."
+aws eks update-cluster-version \
+  --name "$CLUSTER_NAME" \
+  --region "$REGION" \
+  --kubernetes-version "$target_version" > 2>&1;
+
+echo "Sleep ${SLEEP_TIME}"
+sleep ${SLEEP_TIME}
+
+while true; do
+  STATUS=$(aws eks describe-cluster \
     --name "$CLUSTER_NAME" \
     --region "$REGION" \
-    --kubernetes-version "$target_version" > /dev/null 2>&1;
+    --query 'cluster.status' \
+    --output text)
 
-  echo "Sleep ${SLEEP_TIME}"
-  sleep ${SLEEP_TIME}
-
-  while true; do
-    STATUS=$(aws eks describe-cluster \
-      --name "$CLUSTER_NAME" \
-      --region "$REGION" \
-      --query 'cluster.status' \
-      --output text)
-
-    if [[ "$STATUS" == "ACTIVE" ]]; then
-      echo "Cluster upgrade to version $target_version completed successfully."
-      break
-    else
-      echo "Cluster status: $STATUS. Waiting for the upgrade to complete..."
-      if [ "${COUNTER}" -ge "${MAX_CHECKS}" ]; then
-        echo "Error: Reached maximum checks (${MAX_CHECKS}). Exiting."
-        exit 1
-      fi
-      echo "Waiting for ${SLEEP_TIME} seconds before checking again."
-      sleep ${SLEEP_TIME}
-      COUNTER=$((COUNTER+1))
+   if [[ "$STATUS" == "ACTIVE" ]]; then
+    echo "Cluster upgrade to version $target_version completed successfully."
+    break
+   else
+    echo "Cluster status: $STATUS. Waiting for the upgrade to complete..."
+    if [ "${COUNTER}" -ge "${MAX_CHECKS}" ]; then
+      echo "Error: Reached maximum checks (${MAX_CHECKS}). Exiting."
+      exit 1
     fi
-  done 
+    echo "Waiting for ${SLEEP_TIME} seconds before checking again."
+    sleep ${SLEEP_TIME}
+    COUNTER=$((COUNTER+1))
+  fi
+done 
 
 if [[ $? -ne 0 ]]; then
     echo "Error: Failed to start cluster upgrade to version $target_version."
