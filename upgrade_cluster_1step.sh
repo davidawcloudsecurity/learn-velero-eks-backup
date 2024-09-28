@@ -83,7 +83,7 @@ echo "Upgrading the cluster..."
 aws eks update-cluster-version \
   --name "$CLUSTER_NAME" \
   --region "$REGION" \
-  --kubernetes-version "$target_version" > /dev/null 2>&1;
+  --kubernetes-version "$TARGET_VERSION" > /dev/null 2>&1;
 
 echo "Sleep ${SLEEP_TIME}"
 sleep ${SLEEP_TIME}
@@ -96,7 +96,7 @@ while true; do
     --output text)
 
    if [[ "$STATUS" == "ACTIVE" ]]; then
-    echo "Cluster upgrade to version $target_version completed successfully."
+    echo "Cluster upgrade to version $TARGET_VERSION completed successfully."
     break
    else
     echo "Cluster status: $STATUS. Waiting for the upgrade to complete..."
@@ -111,20 +111,20 @@ while true; do
 done 
 
 if [[ $? -ne 0 ]]; then
-    echo "Error: Failed to start cluster upgrade to version $target_version."
+    echo "Error: Failed to start cluster upgrade to version $TARGET_VERSION."
     exit 1
 fi
 
 # Loop to ensure all nodes are upgraded before moving to the next version
 while true; do
-  check_node_versions "$target_version"
+  check_node_versions "$TARGET_VERSION"
 
   # If all nodes match, break the loop and move to the next version
   if [ "$ALL_MATCH" = true ]; then
-    echo "All nodes are ready for version $target_version."
+    echo "All nodes are ready for version $TARGET_VERSION."
     break
   else
-    echo "Not all nodes are upgraded to version $target_version. Retrying..."
+    echo "Not all nodes are upgraded to version $TARGET_VERSION. Retrying..."
     delete_pods
     echo "Sleep ${SLEEP_TIME}"
     sleep ${SLEEP_TIME}        
