@@ -124,3 +124,16 @@ while [[ "$CURRENT_VERSION" != "$TARGET_VERSION" ]]; do
 done
 
 echo "Cluster upgrade to target version $TARGET_VERSION completed successfully."
+# Check and wait until all nodes are upgraded
+while true; do
+  check_node_versions "$TARGET_VERSION"
+
+  if [ "$ALL_MATCH" = true ]; then
+    echo "All nodes are running version v$TARGET_VERSION."
+    break
+  else
+    echo "Not all nodes are upgraded to version $TARGET_VERSION. Retrying..."
+    delete_pods
+    sleep ${SLEEP_TIME}
+  fi
+done
