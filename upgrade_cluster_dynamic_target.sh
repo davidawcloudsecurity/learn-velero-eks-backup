@@ -1,4 +1,5 @@
 #!/bin/bash
+
 COUNTER=0
 MAX_CHECKS=15
 SLEEP_TIME=60
