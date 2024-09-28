@@ -84,6 +84,9 @@ check_node_versions() {
     --region "$REGION" \
     --kubernetes-version "$target_version" > /dev/null 2>&1;
 
+  echo "Sleep ${SLEEP_TIME}"
+  sleep ${SLEEP_TIME}
+
   while true; do
     STATUS=$(aws eks describe-cluster \
       --name "$CLUSTER_NAME" \
