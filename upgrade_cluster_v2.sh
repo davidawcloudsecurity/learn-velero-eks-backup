@@ -1,5 +1,4 @@
 #!/bin/bash
-
 COUNTER=0
 MAX_CHECKS=15
 SLEEP_TIME=60
@@ -77,8 +76,8 @@ while [[ "$CURRENT_VERSION" != "$TARGET_VERSION" ]]; do
   aws eks update-cluster-version \
     --name "$CLUSTER_NAME" \
     --region "$REGION" \
-    --kubernetes-version "$NEXT_VERSION" > /dev/null 2>&1
-
+    --kubernetes-version "$NEXT_VERSION"
+    
   if [[ $? -ne 0 ]]; then
     echo "Error: Failed to upgrade to version $NEXT_VERSION."
     exit 1
