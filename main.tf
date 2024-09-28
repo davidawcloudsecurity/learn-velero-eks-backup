@@ -711,7 +711,7 @@ EOF2
       aws iam update-assume-role-policy --role-name ${var.aws_load_balancer_role} --policy-document file://updated-trust-policy-final.json
       echo "Trust policy updated successfully."
       nlb_sg=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=*ingress*" --query 'SecurityGroups[*].{ID:GroupId}' --output text)
-      recovery_cluster_sg=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --query "cluster.resourcesVpcConfig.securityGroupIds" --output text)
+      recovery_cluster_sg=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --query "cluster.resourcesVpcConfig.clusterSecurityGroupId" --output text)
       echo "Append $nlb_sg to Inbound rule of Recovery EKS CLS: ${var.recovery_eks_cluster} SG: $recovery_cluster_sg"     
       aws ec2 authorize-security-group-ingress --group-id $recovery_cluster_sg --protocol -1 --port 0 --source-group $nlb_sg
       kubectl patch configmap aws-auth -n kube-system --type=json -p='[
