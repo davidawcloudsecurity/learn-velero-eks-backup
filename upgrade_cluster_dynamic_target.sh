@@ -47,7 +47,7 @@ check_node_versions() {
     NODE_VERSION=$(kubectl get node $NODE -o jsonpath='{.status.nodeInfo.kubeletVersion}' | cut -d'.' -f1-2)
     if [[ "$NODE_VERSION" != "v$target_version" ]]; then
       ALL_MATCH=false
-      echo "Node $NODE has not been upgraded yet."
+      echo "Node $NODE has not been upgraded yet, running version $NODE_VERSION"
     fi
   done
 
