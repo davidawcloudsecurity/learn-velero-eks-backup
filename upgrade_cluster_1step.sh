@@ -6,6 +6,30 @@ target_version=1.25
 
 echo "Current time: $(date +"%Y-%m-%d %H:%M:%S")" >> record_file
 
+# Check if both inputs are provided
+if [ "$#" -ne 3 ]; then
+  echo "Error: Usage: $0 <cluster_name> <region> <target_version>"
+  exit 1
+fi
+
+# Take cluster name and region as input parameters
+CLUSTER_NAME=$1
+REGION=$2
+TARGET_VERSION=$3
+
+# Get the current cluster version
+CURRENT_VERSION=$(aws eks describe-cluster \
+  --name "$CLUSTER_NAME" \
+  --region "$REGION" \
+  --query 'cluster.version' \
+  --output text)
+
+# Output retrieved values for confirmation
+echo "Cluster Name: $CLUSTER_NAME"
+echo "Region: $REGION"
+echo "Current version: $CURRENT_VERSION"
+echo "Target version: $TARGET_VERSION"
+
 # Function to delete pods
 delete_pods() {
   # Get all namespaces
@@ -53,28 +77,6 @@ check_node_versions() {
     echo "All nodes are running the target version v$target_version."
   fi
 }
-
-# Check if both inputs are provided
-if [ "$#" -ne 2 ]; then
-  echo "Error: Usage: $0 <cluster_name> <region>"
-  exit 1
-fi
-
-# Take cluster name and region as input parameters
-CLUSTER_NAME=$1
-REGION=$2
-
-# Get the current cluster version
-CURRENT_VERSION=$(aws eks describe-cluster \
-  --name "$CLUSTER_NAME" \
-  --region "$REGION" \
-  --query 'cluster.version' \
-  --output text)
-
-# Output retrieved values for confirmation
-echo "Cluster Name: $CLUSTER_NAME"
-echo "Region: $REGION"
-echo "Current version: $CURRENT_VERSION"
 
 # Start the cluster upgrade
   aws eks update-cluster-version \
