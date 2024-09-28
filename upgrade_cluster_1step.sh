@@ -83,7 +83,7 @@ echo "Upgrading the cluster..."
 aws eks update-cluster-version \
   --name "$CLUSTER_NAME" \
   --region "$REGION" \
-  --kubernetes-version "$target_version" > 2>&1;
+  --kubernetes-version "$target_version" > /dev/null/ 2>&1;
 
 echo "Sleep ${SLEEP_TIME}"
 sleep ${SLEEP_TIME}
