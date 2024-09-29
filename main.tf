@@ -202,6 +202,10 @@ resource "aws_eks_cluster" "recovery_eks_cluster" {
     security_group_ids = [data.aws_security_group.add_eks_sg.id] # Append additional sg to eks cluster
   }
 
+  upgrade_policy {
+    support_type = "STANDARD"
+  }
+
   depends_on = [
     data.aws_iam_role.eks_role,
     data.aws_vpc.vpc,
