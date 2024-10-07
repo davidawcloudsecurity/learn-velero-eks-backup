@@ -720,6 +720,7 @@ EOF2
       aws ec2 authorize-security-group-ingress --group-id $recovery_cluster_sg --protocol -1 --port 0 --source-group $nlb_sg
       platform_role=$(aws iam list-roles --query Roles[*].RoleName | grep genexis-role | sed 's/[", ]//g')
       if [[ -z "$platform_role" ]]; then
+        echo "Project role: $(aws iam list-roles --query Roles[*].RoleName | grep project-trust | sed 's/[", ]//g')"
         kubectl patch configmap aws-auth -n kube-system --type=json -p='[
           {
             "op": "add",
@@ -728,11 +729,12 @@ EOF2
           }
         ]'
       else
+        echo "Platform role: $platform_role"
         kubectl patch configmap aws-auth -n kube-system --type=json -p='[
           {
             "op": "add",
             "path": "/data/mapRoles",
-            "value": "- groups:\n    - system:bootstrappers\n    - system:nodes\n    - system:node-proxier\n  rolearn: arn:aws:iam::${var.account_id}:role/${var.fargate_role}\n  username: system:node:{{SessionName}}\n- rolearn: arn:aws:iam::${var.account_id}:role/$platform_role\n  username: $platform_role\n  groups:\n    - system:masters\n" 
+            "value": "- groups:\n    - system:bootstrappers\n    - system:nodes\n    - system:node-proxier\n  rolearn: arn:aws:iam::${var.account_id}:role/${var.fargate_role}\n  username: system:node:{{SessionName}}\n- rolearn: arn:aws:iam::${var.account_id}:role/${platform_role}\n  username: ${platform_role}\n  groups:\n    - system:masters\n" 
           }
         ]'
       fi
