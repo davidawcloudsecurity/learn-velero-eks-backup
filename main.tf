@@ -734,7 +734,7 @@ EOF2
           {
             "op": "add",
             "path": "/data/mapRoles",
-            "value": "- groups:\n    - system:bootstrappers\n    - system:nodes\n    - system:node-proxier\n  rolearn: arn:aws:iam::${var.account_id}:role/${var.fargate_role}\n  username: system:node:{{SessionName}}\n- rolearn: arn:aws:iam::${var.account_id}:role/${platform_role}\n  username: ${platform_role}\n  groups:\n    - system:masters\n" 
+            "value": "- groups:\n    - system:bootstrappers\n    - system:nodes\n    - system:node-proxier\n  rolearn: arn:aws:iam::${var.account_id}:role/${var.fargate_role}\n  username: system:node:{{SessionName}}\n- rolearn: arn:aws:iam::${var.account_id}:role/$platform_role\n  username: $platform_role\n  groups:\n    - system:masters\n" 
           }
         ]'
       fi
