@@ -718,13 +718,24 @@ EOF2
       recovery_cluster_sg=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --query "cluster.resourcesVpcConfig.clusterSecurityGroupId" --output text)
       echo "Append $nlb_sg to Inbound rule of Recovery EKS CLS: ${var.recovery_eks_cluster} SG: $recovery_cluster_sg"     
       aws ec2 authorize-security-group-ingress --group-id $recovery_cluster_sg --protocol -1 --port 0 --source-group $nlb_sg
-      kubectl patch configmap aws-auth -n kube-system --type=json -p='[
-        {
-          "op": "add",
-          "path": "/data/mapRoles",
-          "value": "- groups:\n    - system:bootstrappers\n    - system:nodes\n    - system:node-proxier\n  rolearn: arn:aws:iam::${var.account_id}:role/${var.fargate_role}\n  username: system:node:{{SessionName}}\n- rolearn: arn:aws:iam::${var.account_id}:role/project-trust-platform-role\n  username: project-trust-platform-role\n  groups:\n    - system:masters\n" 
-        }
-      ]'
+      platform_role=$(aws iam list-roles --query Roles[*].RoleName | grep genexis-role | sed 's/[", ]//g')
+      if [[ -z "$platform_role" ]]; then
+        kubectl patch configmap aws-auth -n kube-system --type=json -p='[
+          {
+            "op": "add",
+            "path": "/data/mapRoles",
+            "value": "- groups:\n    - system:bootstrappers\n    - system:nodes\n    - system:node-proxier\n  rolearn: arn:aws:iam::${var.account_id}:role/${var.fargate_role}\n  username: system:node:{{SessionName}}\n- rolearn: arn:aws:iam::${var.account_id}:role/project-trust-platform-role\n  username: project-trust-platform-role\n  groups:\n    - system:masters\n" 
+          }
+        ]'
+      else
+        kubectl patch configmap aws-auth -n kube-system --type=json -p='[
+          {
+            "op": "add",
+            "path": "/data/mapRoles",
+            "value": "- groups:\n    - system:bootstrappers\n    - system:nodes\n    - system:node-proxier\n  rolearn: arn:aws:iam::${var.account_id}:role/${var.fargate_role}\n  username: system:node:{{SessionName}}\n- rolearn: arn:aws:iam::${var.account_id}:role/$platform_role\n  username: $platform_role\n  groups:\n    - system:masters\n" 
+          }
+        ]'
+      fi
     EOT
   }
 
