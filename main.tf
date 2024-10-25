@@ -718,9 +718,9 @@ EOF2
       recovery_cluster_sg=$(aws eks describe-cluster --name ${var.recovery_eks_cluster} --query "cluster.resourcesVpcConfig.clusterSecurityGroupId" --output text)
       echo "Append $nlb_sg to Inbound rule of Recovery EKS CLS: ${var.recovery_eks_cluster} SG: $recovery_cluster_sg"     
       aws ec2 authorize-security-group-ingress --group-id $recovery_cluster_sg --protocol -1 --port 0 --source-group $nlb_sg
-      platform_role=$(aws iam list-roles --query Roles[*].RoleName | grep genexis-role | sed 's/[", ]//g')
+      platform_role=$(aws iam list-roles --query Roles[*].RoleName | grep genexis-rol | sed 's/[", ]//g')
       if [[ -z "$platform_role" ]]; then
-        echo "Project role: $(aws iam list-roles --query Roles[*].RoleName | grep project-trust | sed 's/[", ]//g')"
+        echo "Project role: $(aws iam list-roles --query Roles[*].RoleName | grep project-tru | sed 's/[", ]//g')"
         kubectl patch configmap aws-auth -n kube-system --type=json -p='[
           {
             "op": "add",
