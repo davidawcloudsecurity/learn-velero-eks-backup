@@ -34,6 +34,7 @@ delete_pods() {
   for NAMESPACE in $NAMESPACES; do
     echo "Deleting all pods in namespace: $NAMESPACE"
     kubectl delete pods --all --namespace="$NAMESPACE"
+    sleep ${SLEEP_TIME}
   done
 }
 
