@@ -15,6 +15,7 @@ CLUSTER_NAME=$1
 REGION=$2
 TARGET_VERSION=$3
 
+echo "Start time: $(TZ='Asia/Singapore' date)"
 # Get the current cluster version
 CURRENT_VERSION=$(aws eks describe-cluster \
   --name "$CLUSTER_NAME" \
@@ -125,3 +126,4 @@ while [[ "$CURRENT_VERSION" != "$TARGET_VERSION" ]]; do
 done
 
 echo "Cluster upgrade to target version $TARGET_VERSION completed successfully."
+echo "End time: $(TZ='Asia/Singapore' date)"
