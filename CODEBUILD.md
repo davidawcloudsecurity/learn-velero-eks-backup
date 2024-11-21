@@ -14,7 +14,10 @@ phases:
         REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
         TARGET_VERSION="1.30"
         
+        aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
+        
         echo "Start time: $(TZ='Asia/Singapore' date)"
+        
         # Get the current cluster version
         CURRENT_VERSION=$(aws eks describe-cluster \
           --name "$CLUSTER_NAME" \
