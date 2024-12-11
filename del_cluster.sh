@@ -2,7 +2,7 @@
 
 # Check if both cluster name and region are provided
 if [ $# -lt 2 ]; then
-  echo "Usage: $0 <cluster_name> <region>"
+  echo "Usage: $0 $(aws eks list-clusters --query clusters --output text) <region>"
   exit 1
 fi
 
